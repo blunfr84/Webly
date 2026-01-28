@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Webly</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <!-- LOGIN PAGE -->
+  <div class="login-page" id="login-page">
+    <div class="login-container">
+      <div class="login-box">
+        <h1>🔐 Webly Admin</h1>
+        <p class="subtitle">Tableau de bord administrateur</p>
+        <div class="error-message" id="error-message"></div>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="username">Identifiant</label>
+            <input type="text" id="username" name="username" required placeholder="admin">
+          </div>
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary">Connexion</button>
+        </form>
+        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-light);">
+          Identifiant: admin | Mot de passe: admin123
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboard">
+    <div class="dashboard-layout">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>Webly</h2>
+          <div class="sidebar-user">Connecté en tant que <strong id="current-user">admin</strong></div>
+        </div>
+        <ul class="sidebar-menu">
+          <li><a href="#" class="menu-link active" onclick="switchTab('dashboard')">📊 Tableau de bord</a></li>
+          <li><a href="#" class="menu-link" onclick="switchTab('services')">💼 Services</a></li>
+          <li><a href="#" class="menu-link" onclick="switchTab('events')">📅 Événements</a></li>
+          <li><a href="#" class="menu-link" onclick="switchTab('messages')">💬 Messages <span id="badge-messages" style="display:none; background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; font-size: 0.75rem; margin-left: 0.5rem;">0</span></a></li>
+        </ul>
+        <button class="btn btn-danger logout-btn" onclick="logout()">Déconnexion</button>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <div class="header">
+          <div class="header-title">
+            <h1 id="page-title">Tableau de bord</h1>
+          </div>
+        </div>
+
+        <div class="content">
+          <!-- ALERTS -->
+          <div class="alert alert-success" id="success-alert"></div>
+          <div class="alert alert-error" id="error-alert"></div>
+
+          <!-- DASHBOARD TAB -->
+          <div class="tab-content active" id="dashboard-tab">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <h3>Services</h3>
+                <div class="stat-value" id="stat-services">0</div>
+              </div>
+              <div class="stat-card">
+                <h3>Événements</h3>
+                <div class="stat-value" id="stat-events">0</div>
+              </div>
+              <div class="stat-card">
+                <h3>Inscriptions</h3>
+                <div class="stat-value" id="stat-registrations">0</div>
+              </div>
+            </div>
+            <h3>Derniers événements</h3>
+            <div class="table-container">
+              <table id="dashboard-events">
+                <thead>
+                  <tr>
+                    <th>Événement</th>
+                    <th>Date</th>
+                    <th>Inscrits</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-events-body">
+                  <tr><td colspan="3">Chargement...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SERVICES TAB -->
+          <div class="tab-content" id="services-tab">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h2>Gestion des Services</h2>
+              <button class="btn btn-primary btn-sm" onclick="openServiceModal()">+ Ajouter un service</button>
+            </div>
+            <div class="table-container">
+              <table id="services-table">
+                <thead>
+                  <tr>
+                    <th>Titre</th>
+                    <th>Prix</th>
+                    <th>Durée</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="services-tbody">
+                  <tr><td colspan="4">Chargement...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- EVENTS TAB -->
+          <div class="tab-content" id="events-tab">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h2>Gestion des Événements</h2>
+              <button class="btn btn-primary btn-sm" onclick="openEventModal()">+ Ajouter un événement</button>
+            </div>
+            <div class="table-container">
+              <table id="events-table">
+                <thead>
+                  <tr>
+                    <th>Titre</th>
+                    <th>Date & Heure</th>
+                    <th>Inscrits</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="events-tbody">
+                  <tr><td colspan="4">Chargement...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- MESSAGES TAB -->
+          <div class="tab-content" id="messages-tab">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h2>Messages de Contact</h2>
+              <span style="font-size: 0.9rem; color: var(--text-light);" id="messages-count">0 message</span>
+            </div>
+            <div class="table-container">
+              <table id="messages-table">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Entreprise</th>
+                    <th>Message</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="messages-tbody">
+                  <tr><td colspan="6">Chargement...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- SERVICE MODAL -->
+  <div class="modal" id="service-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="service-modal-title">Ajouter un service</h2>
+        <button class="close-modal" onclick="closeServiceModal()">&times;</button>
+      </div>
+      <form id="service-form">
+        <div class="form-group">
+          <label for="service-title">Titre</label>
+          <input type="text" id="service-title" required>
+        </div>
+        <div class="form-group">
+          <label for="service-description">Description</label>
+          <textarea id="service-description" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="service-price">Prix (€)</label>
+            <input type="number" id="service-price" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="service-duration">Durée (minutes)</label>
+            <input type="number" id="service-duration">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="service-features">Caractéristiques (une par ligne)</label>
+          <textarea id="service-features" placeholder="Caractéristique 1&#10;Caractéristique 2&#10;Caractéristique 3"></textarea>
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-success">Enregistrer</button>
+          <button type="button" class="btn btn-secondary" onclick="closeServiceModal()">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EVENT MODAL -->
+  <div class="modal" id="event-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="event-modal-title">Ajouter un événement</h2>
+        <button class="close-modal" onclick="closeEventModal()">&times;</button>
+      </div>
+      <form id="event-form">
+        <div class="form-group">
+          <label for="event-title">Titre</label>
+          <input type="text" id="event-title" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="event-date">Date</label>
+            <input type="date" id="event-date" required>
+          </div>
+          <div class="form-group">
+            <label for="event-time">Heure</label>
+            <input type="time" id="event-time" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="event-duration">Durée (minutes)</label>
+            <input type="number" id="event-duration" value="60" required>
+          </div>
+          <div class="form-group">
+            <label for="event-max">Places disponibles</label>
+            <input type="number" id="event-max" value="1" min="1" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="event-participants">Participants inscrits</label>
+          <input type="number" id="event-participants" value="0" min="0" required>
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-success">Enregistrer</button>
+          <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

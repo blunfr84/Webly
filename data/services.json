@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "category": "Montage-PC",
+    "title": "Montage seul",
+    "description": "Gagnez du temps et évitez les erreurs.\nVotre PC est monté avec soin, testé et optimisé pour garantir stabilité, performance et longévité.\n\n✔ Assemblage professionnel\n✔ Câblage propre et optimisé\n✔ Tests complets avant remise",
+    "type": "one-time",
+    "price": 40,
+    "subscriptionPrice": null,
+    "duration": 210,
+    "features": []
+  }
+]

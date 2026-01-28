@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tous nos services de consulting et formation par catégories">
+  <title>Nos Services - Webly</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Styles spécifiques page services */
+    .services-page-hero {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: var(--white);
+      padding: 80px 0;
+      text-align: center;
+    }
+
+    .services-page-hero h1 {
+      font-size: 2.5rem;
+      color: var(--white);
+      margin-bottom: 1rem;
+    }
+
+    .services-page-hero p {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Filtres par catégorie */
+    .category-filters {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 2rem 0;
+      padding: 2rem 0;
+    }
+
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid var(--border-color);
+      background: var(--white);
+      color: var(--text-dark);
+      border-radius: 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .filter-btn:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .filter-btn.active {
+      background: var(--primary-color);
+      color: var(--white);
+      border-color: var(--primary-color);
+    }
+
+    /* Grille services améliorée */
+    .services-page-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .service-page-card {
+      background: var(--white);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .service-page-card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .service-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: var(--white);
+      padding: 1.5rem;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .service-category {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+    }
+
+    .service-header h3 {
+      color: var(--white);
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .service-content {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .service-description {
+      font-size: 0.95rem;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .service-meta {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-light);
+    }
+
+    .meta-item strong {
+      color: var(--primary-color);
+      font-weight: 700;
+    }
+
+    .service-features {
+      list-style: none;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .service-features li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .service-features li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--accent-color);
+      font-weight: 700;
+    }
+
+    .service-footer {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .service-price {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .service-price .label {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .service-price .amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+
+    .service-price .custom {
+      color: var(--primary-color);
+      font-size: 1rem;
+    }
+
+    .compare-checkbox {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    /* Section de comparaison */
+    .comparison-section {
+      margin-top: 3rem;
+      padding: 2rem;
+      background: var(--light-bg);
+      border-radius: 0.75rem;
+      display: none;
+    }
+
+    .comparison-section.active {
+      display: block;
+    }
+
+    .comparison-table {
+      background: var(--white);
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      box-shadow: var(--shadow-md);
+    }
+
+    .comparison-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .comparison-table th {
+      background: var(--primary-color);
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    .comparison-table tr:hover {
+      background: var(--light-bg);
+    }
+
+    /* Message vide */
+    .no-services {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-light);
+    }
+
+    .no-services p {
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      .services-page-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .category-filters {
+        gap: 0.5rem;
+      }
+
+      .filter-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+      }
+
+      .service-footer {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .compare-checkbox {
+        margin-top: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER / NAVIGATION -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">🚀 ConsultPro</div>
+        <nav>
+          <a href="/">Accueil</a>
+          <a href="/services.html" style="color: var(--primary-color); font-weight: 700;">Services</a>
+          <a href="/#agenda">Agenda</a>
+          <a href="/#contact">Contact</a>
+          <a href="#" style="color: var(--primary-color); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; cursor: default;">
+            🛒 <span id="cart-count" style="background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; text-align: center; font-size: 0.75rem; font-weight: 700; line-height: 24px;">0</span>
+          </a>
+          <a href="/admin" class="admin-btn">👤 Admin</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SERVICES PAGE -->
+  <section class="services-page-hero">
+    <div class="container">
+      <h1>Tous Nos Services</h1>
+      <p>Solutions adaptées à chaque étape de votre projet, du diagnostic à la transformation</p>
+    </div>
+  </section>
+
+  <!-- FILTERS -->
+  <section>
+    <div class="container">
+      <div class="category-filters" id="category-filters">
+        <button class="filter-btn active" onclick="filterByCategory('all')">Tous les services</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section>
+    <div class="container">
+      <div class="services-page-grid" id="services-container">
+        <p style="grid-column: 1/-1; text-align: center;">Chargement des services...</p>
+      </div>
+
+      <!-- CART SECTION -->
+      <div class="comparison-section" id="cart-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h3>🛒 Votre Panier</h3>
+          <button class="btn btn-secondary btn-sm" onclick="clearCart()">Vider le panier</button>
+        </div>
+        <div class="comparison-table">
+          <table id="cart-table">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Type</th>
+                <th>Prix unitaire</th>
+                <th>Quantité</th>
+                <th>Sous-total</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="cart-body">
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 1.25rem; font-weight: 700;">Total: <span id="cart-total">0.00</span>€</div>
+          <button class="btn btn-success" onclick="openCheckout()">Procéder au paiement</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section class="light-bg">
+    <div class="container" style="text-align: center;">
+      <h2>Prêt à commencer ?</h2>
+      <p style="max-width: 600px; margin: 1rem auto;">Choisissez le service qui correspond à vos besoins et contactez-moi pour une discussion personnalisée.</p>
+      <a href="/#contact" class="btn btn-primary">Prendre Contact</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 ConsultPro. Tous droits réservés.</p>
+      <div class="footer-links">
+        <a href="#">Mentions légales</a>
+        <a href="#">Politique de confidentialité</a>
+        <a href="#">CGU</a>
+      </div>
+      <p style="font-size: 0.9rem; opacity: 0.7;">Conception professionnel • Services sur mesure</p>
+    </div>
+  </footer>
+  <!-- CHECKOUT MODAL -->
+  <div class="modal" id="checkout-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>💳 Finaliser votre commande</h2>
+        <button type="button" class="close-btn" onclick="closeCheckout()">&times;</button>
+      </div>
+      <form id="checkout-form" onsubmit="submitCheckout(event)">
+        
+        <!-- Step 1: Résumé -->
+        <div class="checkout-section">
+          <div class="section-title">📋 Résumé de votre commande</div>
+          <div class="order-summary">
+            <div class="summary-row">
+              <span>Montant total:</span>
+              <span class="total-amount"><span id="checkout-total">0.00</span>€</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Coordonnées -->
+        <div class="checkout-section">
+          <div class="section-title">👤 Vos informations</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="checkout-name">Nom complet *</label>
+              <input type="text" id="checkout-name" class="form-control" required placeholder="Jean Dupont">
+            </div>
+            <div class="form-group">
+              <label for="checkout-email">Email *</label>
+              <input type="email" id="checkout-email" class="form-control" required placeholder="jean@example.com">
+            </div>
+            <div class="form-group">
+              <label for="checkout-phone">Téléphone *</label>
+              <input type="tel" id="checkout-phone" class="form-control" required placeholder="06 12 34 56 78">
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Mode de paiement -->
+        <div class="checkout-section">
+          <div class="section-title">💰 Mode de paiement</div>
+          <div class="form-group">
+            <label for="checkout-payment">Sélectionner un mode de paiement *</label>
+            <select id="checkout-payment" class="form-control" required>
+              <option value="">-- Choisir un mode --</option>
+              <option value="card">💳 Carte bancaire</option>
+              <option value="transfer">🏦 Virement bancaire</option>
+              <option value="paypal">🅿️ PayPal</option>
+              <option value="check">✓ Chèque</option>
+              <option value="cash">💵 Espèces</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Step 4: Message détaillé -->
+        <div class="checkout-section">
+          <div class="section-title">📝 Détails de votre demande</div>
+          <div class="form-group">
+            <label for="checkout-message">Message / Spécifications *</label>
+            <textarea id="checkout-message" class="form-control" required placeholder="Décrivez précisément votre besoin...&#10;- Vos objectifs&#10;- Vos contraintes&#10;- Vos préférences&#10;- Informations utiles"></textarea>
+          </div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="checkout-actions">
+          <button type="submit" class="btn btn-success btn-lg">✓ Envoyer la commande</button>
+          <button type="button" class="btn btn-outline btn-lg" onclick="closeCheckout()">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none !important;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      overflow-y: auto;
+      padding: 2rem 1rem;
+    }
+
+    .modal.active {
+      display: flex !important;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 1rem;
+      padding: 2.5rem;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideInDown 0.3s ease-out;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.75rem;
+      color: #1a1a1a;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 2rem;
+      cursor: pointer;
+      color: #666;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+      background: #f0f0f0;
+      color: #000;
+    }
+
+    /* Checkout Sections */
+    .checkout-section {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .checkout-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .order-summary {
+      background: linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%);
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.1rem;
+    }
+
+    .summary-row span:first-child {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .total-amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #10b981;
+    }
+
+    /* Form Styles */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 0;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-control {
+      padding: 0.875rem;
+      border: 2px solid #e1e8ed;
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: all 0.2s;
+      background: white;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      background: #f9fafb;
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 120px;
+      max-height: 200px;
+    }
+
+    select.form-control {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233b82f6' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2.5rem;
+    }
+
+    /* Actions */
+    .checkout-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #eee;
+    }
+
+    .btn-lg {
+      padding: 1rem 1.5rem !important;
+      font-weight: 600 !important;
+      border-radius: 0.5rem !important;
+      transition: all 0.2s !important;
+      font-size: 1rem !important;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+      border: none !important;
+      color: white !important;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3) !important;
+    }
+
+    .btn-success:active {
+      transform: translateY(0) !important;
+    }
+
+    .btn-outline {
+      background: white !important;
+      border: 2px solid #e1e8ed !important;
+      color: #2c3e50 !important;
+    }
+
+    .btn-outline:hover {
+      background: #f5f7fa !important;
+      border-color: #bfdbfe !important;
+    }
+
+    .btn-quantity {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .quantity-input {
+      width: 50px;
+      text-align: center;
+      margin: 0 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.25rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .modal-content {
+        padding: 1.5rem;
+      }
+
+      .modal-header h2 {
+        font-size: 1.5rem;
+      }
+
+      .checkout-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script src="js/utils.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/services.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="js/stripe-payment.js"></script>
+</body>
+</html>

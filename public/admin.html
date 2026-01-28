@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Webly</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    /* ===== STYLES DASHBOARD AMÉLIORÉ ===== */
+    
+    /* Stats Cards */
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stats-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      border-left: 5px solid;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .stats-card.green {
+      border-left-color: #10b981;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, white 100%);
+    }
+
+    .stats-card.blue {
+      border-left-color: #2563eb;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, white 100%);
+    }
+
+    .stats-card.amber {
+      border-left-color: #f59e0b;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, white 100%);
+    }
+
+    .stats-card.purple {
+      border-left-color: #8b5cf6;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, white 100%);
+    }
+
+    .stats-card-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .stats-card-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .stats-card-value.stat-update {
+      animation: statUpdatePulse 0.6s ease-in-out;
+    }
+
+    @keyframes statUpdatePulse {
+      0% {
+        transform: scale(1);
+        color: inherit;
+      }
+      50% {
+        transform: scale(1.1);
+        filter: brightness(1.2);
+      }
+      100% {
+        transform: scale(1);
+        color: inherit;
+      }
+    }
+
+    .stats-card-value.green {
+      color: #10b981;
+    }
+
+    .stats-card-value.blue {
+      color: #2563eb;
+    }
+
+    .stats-card-value.amber {
+      color: #f59e0b;
+    }
+
+    .stats-card-value.purple {
+      color: #8b5cf6;
+    }
+
+    .stats-card-subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .stats-card-subtitle.positive {
+      color: #10b981;
+    }
+
+    /* Charts Section */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-container {
+      background: white;
+      border-radius: 12px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #1e293b;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 1rem;
+    }
+
+    .progress-bar-item {
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-bar-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .progress-name {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .progress-value {
+      font-weight: 700;
+      color: #2563eb;
+    }
+
+    .progress-bar {
+      background: #e2e8f0;
+      height: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.6s ease;
+      background: linear-gradient(90deg, #2563eb, #3b82f6);
+    }
+
+    .progress-fill.bar-update {
+      animation: barUpdateGlow 0.6s ease-in-out;
+    }
+
+    .progress-value.perf-update {
+      animation: perfUpdatePulse 0.6s ease-in-out;
+    }
+
+    @keyframes barUpdateGlow {
+      0% {
+        filter: brightness(1);
+      }
+      50% {
+        filter: brightness(1.3);
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+      }
+      100% {
+        filter: brightness(1);
+      }
+    }
+
+    @keyframes perfUpdatePulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.15);
+        color: #3b82f6;
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .activity-fade-in {
+      animation: fadeInSlide 0.4s ease-in-out;
+    }
+
+    @keyframes fadeInSlide {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .progress-fill.green {
+      background: linear-gradient(90deg, #10b981, #34d399);
+    }
+
+    .progress-fill.amber {
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    .progress-fill.purple {
+      background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+    }
+
+    .metric-box {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #2563eb;
+    }
+
+    /* Recent Activity */
+    .recent-activity {
+      background: white;
+      border-radius: 12px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+    }
+
+    .activity-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .activity-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e2e8f0;
+      align-items: flex-start;
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .activity-icon {
+      font-size: 1.5rem;
+      min-width: 35px;
+      text-align: center;
+    }
+
+    .activity-content h4 {
+      margin: 0 0 0.25rem 0;
+      font-size: 0.95rem;
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    .activity-time {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    /* Filter Buttons */
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid #e2e8f0;
+      background: white;
+      color: #64748b;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: #2563eb;
+      color: #2563eb;
+    }
+
+    .filter-btn.active {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    @media (max-width: 1200px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN PAGE -->
+  <div class="login-page" id="login-page">
+    <div class="login-container">
+      <div class="login-box">
+        <h1>🔐 Webly Admin</h1>
+        <p class="subtitle">Tableau de bord administrateur</p>
+        <div class="error-message" id="error-message"></div>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="username">Identifiant</label>
+            <input type="text" id="username" name="username" required placeholder="admin">
+          </div>
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary">Connexion</button>
+        </form>
+        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-light);">
+          Identifiant: admin | Mot de passe: admin123
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboard">
+    <div class="dashboard-layout">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>Webly</h2>
+          <div class="sidebar-user">Connecté en tant que <strong id="current-user">admin</strong></div>
+        </div>
+        <ul class="sidebar-menu">
+          <li><a href="#" class="menu-link active" onclick="switchTab('dashboard')">📊 Tableau de bord</a></li>
+          <li><a href="#" class="menu-link" onclick="switchTab('services')">💼 Services</a></li>
+          <li><a href="#" class="menu-link" onclick="switchTab('events')">📅 Événements</a></li>
+          <li><a href="#" class="menu-link" onclick="switchTab('messages')">💬 Messages <span id="badge-messages" style="display:none; background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; font-size: 0.75rem; margin-left: 0.5rem;">0</span></a></li>
+        </ul>
+        <button class="btn btn-danger logout-btn" onclick="logout()">Déconnexion</button>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <div class="header">
+          <div class="header-title">
+            <h1 id="page-title">📊 Tableau de bord <span style="font-size: 0.6em; background: #10b981; color: white; padding: 0.3rem 0.8rem; border-radius: 1rem; margin-left: 1rem; font-weight: 600;">🔄 Temps réel</span></h1>
+          </div>
+        </div>
+
+        <div class="content">
+          <!-- ALERTS -->
+          <div class="alert alert-success" id="success-alert"></div>
+          <div class="alert alert-error" id="error-alert"></div>
+
+          <!-- DASHBOARD TAB -->
+          <div class="tab-content active" id="dashboard-tab">
+            <!-- STATS CARDS -->
+            <div class="dashboard-stats">
+              <div class="stats-card green">
+                <div class="stats-card-label">💰 Chiffre d'affaires</div>
+                <div class="stats-card-value green" id="stat-revenue">0€</div>
+                <div class="stats-card-subtitle positive">
+                  <span>↑ En augmentation</span>
+                </div>
+              </div>
+
+              <div class="stats-card amber">
+                <div class="stats-card-label">👥 Visiteurs du site</div>
+                <div class="stats-card-value amber" id="stat-visitors">0</div>
+                <div class="stats-card-subtitle positive">
+                  <span>↑ +12% cette semaine</span>
+                </div>
+              </div>
+
+              <div class="stats-card blue">
+                <div class="stats-card-label">💼 Services</div>
+                <div class="stats-card-value blue" id="stat-services">0</div>
+                <div class="stats-card-subtitle">
+                  <span>Services proposés</span>
+                </div>
+              </div>
+
+              <div class="stats-card purple">
+                <div class="stats-card-label">📅 Événements</div>
+                <div class="stats-card-value purple" id="stat-events">0</div>
+                <div class="stats-card-subtitle">
+                  <span>À venir</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CHARTS SECTION -->
+            <div class="charts-grid">
+              <!-- LEFT: Performance Chart -->
+              <div class="chart-container">
+                <h3 class="chart-title">📊 Performance des Services par Catégorie</h3>
+                <div id="services-performance">
+                  <div class="progress-bar-item">
+                    <div class="progress-label">
+                      <span class="progress-name">Consultations</span>
+                      <span class="progress-value" id="perf-consultations">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                      <div class="progress-fill" id="perf-bar-consultations" style="width: 0%"></div>
+                    </div>
+                  </div>
+
+                  <div class="progress-bar-item">
+                    <div class="progress-label">
+                      <span class="progress-name">Montage-PC</span>
+                      <span class="progress-value" id="perf-audits">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                      <div class="progress-fill green" id="perf-bar-audits" style="width: 0%"></div>
+                    </div>
+                  </div>
+
+                  <div class="progress-bar-item">
+                    <div class="progress-label">
+                      <span class="progress-name">Formations</span>
+                      <span class="progress-value" id="perf-formations">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                      <div class="progress-fill amber" id="perf-bar-formations" style="width: 0%"></div>
+                    </div>
+                  </div>
+
+                  <div class="progress-bar-item">
+                    <div class="progress-label">
+                      <span class="progress-name">Accompagnement</span>
+                      <span class="progress-value" id="perf-accompagnement">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                      <div class="progress-fill purple" id="perf-bar-accompagnement" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RIGHT: Metrics -->
+              <div class="chart-container">
+                <h3 class="chart-title">📈 Indicateurs Clés</h3>
+                <div class="metric-box">
+                  <div class="metric-label">Taux de Conversion</div>
+                  <div class="metric-value" id="conversion-rate">0%</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-label">Revenu Moyen/Service</div>
+                  <div class="metric-value" id="avg-revenue">0€</div>
+                </div>
+                <div class="metric-box">
+                  <div class="metric-label">Inscriptions Totales</div>
+                  <div class="metric-value" id="total-registrations">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RECENT ACTIVITY -->
+            <div class="recent-activity">
+              <h3 class="chart-title">📝 Activité Récente</h3>
+              <ul class="activity-list" id="recent-events-list">
+                <li class="activity-item">
+                  <div class="activity-icon">ℹ️</div>
+                  <div class="activity-content">
+                    <h4>Chargement en cours...</h4>
+                    <div class="activity-time">Patientez</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- DERNIERS ÉVÉNEMENTS -->
+            <div class="chart-container">
+              <h3 class="chart-title">📅 Prochains Événements</h3>
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Événement</th>
+                      <th>Date</th>
+                      <th>Inscrits</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-events-body">
+                    <tr><td colspan="3">Chargement...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SERVICES TAB -->
+          <div class="tab-content" id="services-tab">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h2>Gestion des Services</h2>
+              <button class="btn btn-primary btn-sm" onclick="openServiceModal()">+ Ajouter un service</button>
+            </div>
+            <div class="table-container">
+              <table id="services-table">
+                <thead>
+                  <tr>
+                    <th>Titre</th>
+                    <th>Catégorie</th>
+                    <th>Prix</th>
+                    <th>Durée</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="services-tbody">
+                  <tr><td colspan="5">Chargement...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- EVENTS TAB -->
+          <div class="tab-content" id="events-tab">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h2>Gestion des Événements</h2>
+              <button class="btn btn-primary btn-sm" onclick="openEventModal()">+ Ajouter un événement</button>
+            </div>
+            <div class="table-container">
+              <table id="events-table">
+                <thead>
+                  <tr>
+                    <th>Titre</th>
+                    <th>Date & Heure</th>
+                    <th>Inscrits</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="events-tbody">
+                  <tr><td colspan="4">Chargement...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- MESSAGES TAB -->
+          <div class="tab-content" id="messages-tab">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <div>
+                <h2>Messages & Commandes</h2>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                  <button class="filter-btn" onclick="filterMessagesByStatus('all')">📋 Tous</button>
+                  <button class="filter-btn active" onclick="filterMessagesByStatus('pending')">⏳ En attente</button>
+                  <button class="filter-btn" onclick="filterMessagesByStatus('completed')">✅ Effectuées</button>
+                </div>
+              </div>
+              <span style="font-size: 0.9rem; color: var(--text-light);" id="messages-count">0 message</span>
+            </div>
+            <div class="table-container">
+              <table id="messages-table">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Message</th>
+                    <th>Statut</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="messages-tbody">
+                  <tr><td colspan="7">Chargement...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- SERVICE MODAL -->
+  <div class="modal" id="service-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="service-modal-title">Ajouter un service</h2>
+        <button class="close-modal" onclick="closeServiceModal()">&times;</button>
+      </div>
+      <form id="service-form">
+        <div class="form-group">
+          <label for="service-category">Catégorie</label>
+          <input type="text" id="service-category" placeholder="Ex: Consultations">
+        </div>
+        <div class="form-group">
+          <label for="service-type">Type de service</label>
+          <select id="service-type" required onchange="toggleSubscriptionPrice()">
+            <option value="one-time">Achat unique</option>
+            <option value="subscription">Abonnement mensuel</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="service-title">Titre</label>
+          <input type="text" id="service-title" required>
+        </div>
+        <div class="form-group">
+          <label for="service-description">Description</label>
+          <textarea id="service-description" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="service-price">Prix (€)</label>
+            <input type="number" id="service-price" step="0.01">
+          </div>
+          <div class="form-group" id="subscription-price-group" style="display: none;">
+            <label for="service-subscription-price">Prix mensuel (€)</label>
+            <input type="number" id="service-subscription-price" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="service-duration">Durée (minutes)</label>
+            <input type="number" id="service-duration">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="service-features">Caractéristiques (une par ligne)</label>
+          <textarea id="service-features" placeholder="Caractéristique 1&#10;Caractéristique 2&#10;Caractéristique 3"></textarea>
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-success">Enregistrer</button>
+          <button type="button" class="btn btn-secondary" onclick="closeServiceModal()">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EVENT MODAL -->
+  <div class="modal" id="event-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="event-modal-title">Ajouter un événement</h2>
+        <button class="close-modal" onclick="closeEventModal()">&times;</button>
+      </div>
+      <form id="event-form">
+        <div class="form-group">
+          <label for="event-title">Titre</label>
+          <input type="text" id="event-title" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="event-date">Date</label>
+            <input type="date" id="event-date" required>
+          </div>
+          <div class="form-group">
+            <label for="event-time">Heure</label>
+            <input type="time" id="event-time" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="event-duration">Durée (minutes)</label>
+            <input type="number" id="event-duration" value="60" required>
+          </div>
+          <div class="form-group">
+            <label for="event-max">Places disponibles</label>
+            <input type="number" id="event-max" value="1" min="1" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="event-participants">Participants inscrits</label>
+          <input type="number" id="event-participants" value="0" min="0" required>
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-success">Enregistrer</button>
+          <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MESSAGE DETAIL MODAL -->
+  <div class="modal" id="message-modal">
+    <div class="modal-content" style="max-width: 700px; max-height: 80vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h2>📝 Détails de la commande</h2>
+        <button class="close-modal" onclick="closeMessageModal()">&times;</button>
+      </div>
+      <div id="message-detail-content" style="white-space: pre-wrap; font-family: monospace; font-size: 0.9rem; background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; line-height: 1.6; color: #333;">
+      </div>
+      <div class="btn-group" style="margin-top: 1.5rem;">
+        <button class="btn btn-secondary" onclick="closeMessageModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

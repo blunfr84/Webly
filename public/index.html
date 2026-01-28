@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Services professionnels. Consultations, audits, formations et accompagnement mensuel.">
+  <title>Services Professionnels - </title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER / NAVIGATION -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">🚀 Webly</div>
+        <nav>
+          <a href="#services">Services</a>
+          <a href="#agenda">Agenda</a>
+          <a href="#pourquoi">Avantages</a>
+          <a href="#contact">Contact</a>
+          <a href="/services.html" style="color: var(--primary-color); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+            🛒 Panier <span id="cart-badge" style="background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; text-align: center; font-size: 0.75rem; font-weight: 700; display: none; line-height: 24px;">0</span>
+          </a>
+          <a href="/admin" class="admin-btn">👤 Admin</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="container">
+      <h1>Développez Votre Succès</h1>
+      <p>Services professionnels de consulting et formation pour transformer votre entreprise</p>
+      <div class="cta-buttons">
+        <button class="btn btn-primary" onclick="document.getElementById('contact').scrollIntoView()">Prendre Contact</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('agenda').scrollIntoView()">Voir l'Agenda</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES SECTION -->
+  <section id="services" class="light-bg">
+    <div class="container">
+      <h2 style="text-align: center; margin-bottom: 3rem;">Nos Services</h2>
+      <p style="text-align: center; max-width: 600px; margin: 0 auto 3rem; font-size: 1.1rem;">
+        Des solutions adaptées à vos besoins, du diagnostic au déploiement.
+      </p>
+      <div class="services-grid" id="services-grid">
+        <p style="grid-column: 1/-1; text-align: center;">Chargement des services...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AGENDA SECTION -->
+  <section id="agenda">
+    <div class="container">
+      <h2 style="text-align: center; margin-bottom: 3rem;">📅 Agenda & Disponibilités</h2>
+      <p style="text-align: center; max-width: 600px; margin: 0 auto 3rem; font-size: 1.1rem;">
+        Réservez votre créneau parmi les événements à venir. Mis à jour en direct.
+      </p>
+      <div class="events-grid" id="events-grid">
+        <p style="grid-column: 1/-1; text-align: center;">Chargement de l'agenda...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY CHOOSE SECTION -->
+  <section id="pourquoi" class="light-bg">
+    <div class="container">
+      <h2 style="text-align: center; margin-bottom: 3rem;">Pourquoi Me Choisir ?</h2>
+      
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon">🎯</div>
+          <h3>Expertise Reconnue</h3>
+          <p>Etudiant en Licence Informatique. Résultats assurés par du professionalisme.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">⚡</div>
+          <h3>Résultats Rapides</h3>
+          <p>Approche pragmatique et orientée vers les résultats concrets et mesurables.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">👥</div>
+          <h3>Accompagnement Personnel</h3>
+          <p>Suivi individualisé et adaptée à votre contexte spécifique.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">💡</div>
+          <h3>Innovation Continue</h3>
+          <p>Veille constante sur les meilleures pratiques et nouvelles tendances du marché.</p>
+        </div>
+      </div>
+
+      <div class="testimonial">
+        <p>"Les difficultés ne sont pas faites pour abattre, mais pour être abattues."</p>
+        <div class="testimonial-author">- Charles de Montalembert</div>
+      </div>
+
+      <div class="testimonial">
+        <p>"Le succès est la somme de petits efforts, répétés jours après jour."</p>
+        <div class="testimonial-author">- Leo Rober Collier</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT SECTION -->
+  <section id="contact">
+    <div class="container">
+      <h2 style="text-align: center; margin-bottom: 1rem;">Parlons de Votre Projet</h2>
+      <p style="text-align: center; max-width: 600px; margin: 0 auto 2rem; font-size: 1.1rem;">
+        Envoyez-moi vos coordonnées et vos besoins. Je vous recontacterai rapidement pour discuter de votre projet.
+      </p>
+      <form class="contact-form" id="contact-form">
+        <div class="form-group">
+          <label for="name">Votre Nom</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="company">Entreprise</label>
+          <input type="text" id="company" name="company">
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="Décrivez votre projet et vos objectifs..." required></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Envoyer</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Webly. Tous droits réservés.</p>
+      <div class="footer-links">
+        <a href="#">Mentions légales</a>
+        <a href="#">Politique de confidentialité</a>
+        <a href="#">CGU</a>
+      </div>
+      <p style="font-size: 0.9rem; opacity: 0.7;">Conception professionnel • Services sur mesure</p>
+    </div>
+  </footer>
+
+  <script src="js/utils.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
