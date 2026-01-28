@@ -10,10 +10,10 @@ module.exports = {
   JWT_SECRET: process.env.JWT_SECRET || 'your-super-secret-key-change-in-production',
   
   // [MODIFIABLE] Identifiant administrateur - À personnaliser selon vos besoins
-  ADMIN_USERNAME: 'hugper',
+  ADMIN_USERNAME: process.env.ADMIN_USERNAME || 'hugper',
   
   // [MODIFIABLE] Mot de passe administrateur - CRITIQUE en production, utiliser des variables d'environnement
-  ADMIN_PASSWORD: 'Huyagonis72450',
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'Huyagonis72450#',
   
   // [MODIFIABLE] Origines CORS autorisées - Ajouter vos domaines de production/staging
   CORS_ORIGIN: ['http://localhost:3000', 'http://127.0.0.1:3000']

@@ -43,7 +43,7 @@ git commit -m "Initial commit: Webly avec Stripe et emails"
 ### 4.2 Ajouter le remote et pousser
 ```bash
 # Remplacez USERNAME par votre username GitHub
-git remote add origin https://github.com/USERNAME/consultpro.git
+git remote add origin https://github.com/blunfr84/Webly.git
 git branch -M main
 git push -u origin main
 ```
@@ -57,7 +57,7 @@ git push -u origin main
 
 ## Étape 5 : Vérifier sur GitHub
 
-1. Allez sur votre repo : https://github.com/USERNAME/consultpro
+1. Allez sur votre repo : https://github.com/USERNAME/onsultpro
 2. Vérifiez que tous les fichiers sont présents
 3. Le README devrait s'afficher automatiquement
 

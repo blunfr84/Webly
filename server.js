@@ -37,6 +37,8 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/config', configRoutes);
 
+app.use(express.static('public'));
+
 // Route racine
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -63,5 +65,4 @@ app.listen(config.PORT, () => {
   console.log(`✨ Serveur lancé sur http://localhost:${config.PORT}`);
   console.log(`📄 Page d'accueil : http://localhost:${config.PORT}`);
   console.log(`👨‍💼 Page admin : http://localhost:${config.PORT}/admin`);
-  console.log(`🔐 Identifiant admin : ${config.ADMIN_USERNAME}`);
 });
