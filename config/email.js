@@ -1,25 +1,39 @@
 // Configuration pour l'envoi d'emails
 const nodemailer = require('nodemailer');
 
+const EMAIL_USER = process.env.EMAIL_USER || '';
+const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD || '';
+const EMAIL_TO = process.env.EMAIL_TO || EMAIL_USER;
+
 // Configuration du transporteur Gmail (vous pouvez adapter pour un autre service)
 // Note: Pour Gmail, vous devez utiliser un mot de passe d'application
 // Générez-le ici: https://myaccount.google.com/apppasswords
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER || 'hugo.perdereau72@gmail.com',
-    pass: process.env.EMAIL_PASSWORD || 'irpp azpd tgra ahoh'
-  }
-});
+const transporter = (EMAIL_USER && EMAIL_PASSWORD)
+  ? nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASSWORD
+      }
+    })
+  : null;
 
 /**
  * Envoie un email de notification quand un nouveau message est reçu
  */
-const sendNotificationEmail = async (messageData) => {
+const sendNotificationEmail = async (messageData, options = {}) => {
   try {
+    if (!transporter) {
+      console.warn('⚠️ Email non configuré: définissez EMAIL_USER et EMAIL_PASSWORD dans Render.');
+      return false;
+    }
+
+    const adminUrl = options.adminUrl || process.env.ADMIN_URL || 'http://localhost:3000/admin';
+    const recipient = options.to || EMAIL_TO;
+
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'hugo.perdereau72@gmail.com',
-      to: 'hugo.perdereau72@gmail.com',
+      from: EMAIL_USER,
+      to: recipient,
       subject: `📬 Nouveau message de ${messageData.name} - Webly`,
       html: `
         <!DOCTYPE html>
@@ -102,7 +116,7 @@ const sendNotificationEmail = async (messageData) => {
               
               <!-- Bouton d'action -->
               <div style="text-align: center; margin-bottom: 30px;">
-                <a href="http://localhost:3000/admin.html" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; letter-spacing: 0.3px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); transition: all 0.2s ease;">
+                <a href="${adminUrl}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; letter-spacing: 0.3px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); transition: all 0.2s ease;">
                   ➜ Accéder au Tableau de Bord
                 </a>
               </div>
@@ -141,7 +155,7 @@ Date: ${messageData.date} à ${messageData.time}
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`✅ Email envoyé à hugo.perdereau72@gmail.com pour le message de ${messageData.name}`);
+    console.log(`✅ Email envoyé à ${recipient} pour le message de ${messageData.name}`);
     return true;
   } catch (error) {
     console.error('❌ Erreur lors de l\'envoi de l\'email:', error);

@@ -1,4 +1,9 @@
 // Configuration de l'application
+const corsOriginEnv = process.env.CORS_ORIGIN;
+const corsOrigin = corsOriginEnv
+  ? corsOriginEnv.split(',').map(origin => origin.trim()).filter(Boolean)
+  : true;
+
 module.exports = {
   // [MODIFIABLE] Port d'écoute du serveur - Changer selon votre environnement (production, staging)
   PORT: process.env.PORT || 3000,
@@ -16,5 +21,6 @@ module.exports = {
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'Huyagonis72450#',
   
   // [MODIFIABLE] Origines CORS autorisées - Ajouter vos domaines de production/staging
-  CORS_ORIGIN: ['http://localhost:3000', 'http://127.0.0.1:3000']
+  // Par défaut, on reflète l'origine entrante pour autoriser le front si hébergé ailleurs.
+  CORS_ORIGIN: corsOrigin
 };

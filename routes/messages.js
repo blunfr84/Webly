@@ -95,8 +95,11 @@ router.post('/', (req, res) => {
   messages.push(newMessage);
 
   if (saveMessages(messages)) {
+    // Construire l'URL admin à partir de la requête
+    const adminUrl = `${req.protocol}://${req.get('host')}/admin`;
+
     // Envoyer l'email de notification en arrière-plan (ne pas bloquer la réponse)
-    sendNotificationEmail(newMessage).catch(err => {
+    sendNotificationEmail(newMessage, { adminUrl }).catch(err => {
       console.error('Erreur notification email:', err);
     });
     

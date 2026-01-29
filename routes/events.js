@@ -38,6 +38,7 @@ const saveEvents = (events) => {
  * Récupère tous les événements
  */
 router.get('/', (req, res) => {
+  res.set('Cache-Control', 'no-store');
   const events = loadEvents();
   // Filtrer les événements futurs par défaut
   const futureEvents = events.filter(event => {

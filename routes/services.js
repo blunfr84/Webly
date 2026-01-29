@@ -38,6 +38,7 @@ const saveServices = (services) => {
  * Récupère tous les services
  */
 router.get('/', (req, res) => {
+  res.set('Cache-Control', 'no-store');
   const services = loadServices();
   res.json({ success: true, data: services });
 });
