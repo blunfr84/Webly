@@ -1,6 +1,6 @@
 // Stripe Payment Handler
 let STRIPE_PUBLISHABLE_KEY = 'pk_test_placeholder';
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = `${window.location.origin}/api`;
 
 // Charger la clé publique depuis l'API au démarrage
 (async () => {

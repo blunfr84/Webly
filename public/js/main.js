@@ -1,7 +1,7 @@
 // Script principal de la page publique
 // Charge et affiche les services et événements depuis l'API
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = `${window.location.origin}/api`;
 
 // Au chargement, tracker les visiteurs
 document.addEventListener('DOMContentLoaded', () => {
