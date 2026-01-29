@@ -1,6 +1,6 @@
 // Script pour le panneau administrateur
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = `${window.location.origin}/api`;
 let currentToken = localStorage.getItem('token');
 let editingId = null;
 let editingType = null; // 'service' ou 'event'
