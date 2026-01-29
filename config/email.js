@@ -4,18 +4,35 @@ const nodemailer = require('nodemailer');
 const EMAIL_USER = process.env.EMAIL_USER || '';
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD || '';
 const EMAIL_TO = process.env.EMAIL_TO || EMAIL_USER;
+const EMAIL_FROM = process.env.EMAIL_FROM || EMAIL_USER;
+const EMAIL_SERVICE = process.env.EMAIL_SERVICE || '';
+const EMAIL_HOST = process.env.EMAIL_HOST || '';
+const EMAIL_PORT = process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT, 10) : undefined;
+const EMAIL_SECURE = process.env.EMAIL_SECURE === 'true';
 
 // Configuration du transporteur Gmail (vous pouvez adapter pour un autre service)
 // Note: Pour Gmail, vous devez utiliser un mot de passe d'application
 // Générez-le ici: https://myaccount.google.com/apppasswords
 const transporter = (EMAIL_USER && EMAIL_PASSWORD)
-  ? nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASSWORD
-      }
-    })
+  ? nodemailer.createTransport(
+      EMAIL_HOST
+        ? {
+            host: EMAIL_HOST,
+            port: EMAIL_PORT || 587,
+            secure: EMAIL_SECURE,
+            auth: {
+              user: EMAIL_USER,
+              pass: EMAIL_PASSWORD
+            }
+          }
+        : {
+            service: EMAIL_SERVICE || 'gmail',
+            auth: {
+              user: EMAIL_USER,
+              pass: EMAIL_PASSWORD
+            }
+          }
+    )
   : null;
 
 /**
@@ -32,8 +49,9 @@ const sendNotificationEmail = async (messageData, options = {}) => {
     const recipient = options.to || EMAIL_TO;
 
     const mailOptions = {
-      from: EMAIL_USER,
+      from: EMAIL_FROM,
       to: recipient,
+      replyTo: messageData.email,
       subject: `📬 Nouveau message de ${messageData.name} - Webly`,
       html: `
         <!DOCTYPE html>
@@ -154,6 +172,13 @@ Date: ${messageData.date} à ${messageData.time}
       `
     };
 
+    try {
+      await transporter.verify();
+    } catch (verifyError) {
+      console.error('❌ Transport email invalide:', verifyError);
+      return false;
+    }
+
     await transporter.sendMail(mailOptions);
     console.log(`✅ Email envoyé à ${recipient} pour le message de ${messageData.name}`);
     return true;
@@ -168,6 +193,11 @@ Date: ${messageData.date} à ${messageData.time}
  */
 const sendInvoiceEmail = async (paymentData) => {
   try {
+    if (!transporter) {
+      console.warn('⚠️ Email non configuré: définissez EMAIL_USER et EMAIL_PASSWORD dans Render.');
+      return false;
+    }
+
     const {
       customerEmail,
       customerName,
@@ -187,7 +217,7 @@ const sendInvoiceEmail = async (paymentData) => {
     });
 
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'hugo.perdereau72@gmail.com',
+      from: EMAIL_FROM,
       to: customerEmail,
       subject: `📋 Facture #${invNumber} - Webly`,
       html: `
@@ -307,6 +337,13 @@ Merci pour votre achat !
 Webly - Plateforme de Services
       `
     };
+
+    try {
+      await transporter.verify();
+    } catch (verifyError) {
+      console.error('❌ Transport email invalide:', verifyError);
+      return false;
+    }
 
     await transporter.sendMail(mailOptions);
     console.log(`✅ Facture envoyée à ${customerEmail} (Facture #${invNumber})`);

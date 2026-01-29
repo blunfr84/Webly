@@ -107,7 +107,6 @@ function displayServices(services) {
           </div>
           <div style="display: flex; gap: 0.75rem;">
             <button class="btn btn-primary btn-sm" onclick="addToCart(${service.id})">Ajouter au panier</button>
-            ${service.price ? `<button class="btn btn-success btn-sm" onclick="initiatePayment(${service.id}, '${service.title.replace(/'/g, "\\'")}', ${service.price})" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">💳 Payer</button>` : ''}
           </div>
         </div>
       </div>
