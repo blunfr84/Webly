@@ -89,7 +89,14 @@ function displayServices(services) {
         <p class="service-description">${service.description}</p>
         
         <div class="service-meta">
-          ${service.price ? `<div class="meta-item">💰 <strong>${service.price}€</strong></div>` : ''}
+          ${service.type === 'subscription'
+            ? (service.subscriptionPrice || service.price
+                ? `<div class="meta-item">💰 <strong>${service.subscriptionPrice ?? service.price}€ /mois</strong></div>`
+                : '')
+            : (service.price
+                ? `<div class="meta-item">💰 <strong>${service.price}€</strong></div>`
+                : '')
+          }
           ${service.duration ? `<div class="meta-item">⏱️ <strong>${formatDuration(service.duration)}</strong></div>` : ''}
         </div>
 
@@ -102,11 +109,29 @@ function displayServices(services) {
         <div class="service-footer">
           <div class="service-price">
             <div class="label">À partir de</div>
-            ${service.price ? `<div class="amount">${service.price}€</div>` : `<div class="custom">Sur devis</div>`}
+            ${service.type === 'subscription'
+              ? (service.subscriptionPrice || service.price
+                  ? `<div class="amount">${service.subscriptionPrice ?? service.price}€</div>`
+                  : `<div class="custom">Sur devis</div>`)
+              : (service.price
+                  ? `<div class="amount">${service.price}€</div>`
+                  : `<div class="custom">Sur devis</div>`)
+            }
             ${service.type === 'subscription' ? `<div class="label" style="margin-top: 0.5rem; color: #10b981;">/mois</div>` : ''}
           </div>
           <div style="display: flex; gap: 0.75rem;">
+            ${service.options && service.options.length > 0 ? `
+              <div style="display: grid; gap: 0.35rem; font-size: 0.85rem;">
+                ${service.options.map((opt, idx) => `
+                  <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" data-option-service="${service.id}" data-option-name="${opt.name}" id="option-${service.id}-${idx}">
+                    ${opt.name} (+${opt.price}€)
+                  </label>
+                `).join('')}
+              </div>
+            ` : ''}
             <button class="btn btn-primary btn-sm" onclick="addToCart(${service.id})">Ajouter au panier</button>
+            ${service.type === 'subscription' ? `<button class="btn btn-success btn-sm" onclick="initiateSubscription(${service.id}, getSelectedOptions(${service.id}))">S'abonner</button>` : ''}
           </div>
         </div>
       </div>
@@ -119,10 +144,16 @@ function displayServices(services) {
 /**
  * Ajoute un service au panier
  */
+function getSelectedOptions(serviceId) {
+  return Array.from(document.querySelectorAll(`[data-option-service="${serviceId}"]:checked`))
+    .map(input => input.getAttribute('data-option-name'));
+}
+
 function addToCart(serviceId) {
   const service = allServices.find(s => s.id === serviceId);
   if (service) {
-    cart.addItem(service, 1);
+    const selectedOptions = getSelectedOptions(serviceId);
+    cart.addItem(service, 1, { selectedOptions });
     showNotification('✓ Service ajouté au panier');
   }
 }
@@ -177,19 +208,29 @@ function updateCartDisplay() {
   // Remplir le tableau
   if (cartBody) {
     cartBody.innerHTML = cart.getItems().map(item => {
-      const subtotal = (item.service.price || 0) * item.quantity;
+      const subtotal = cart.getItemTotal(item);
       return `
         <tr>
           <td>
             <strong>${item.service.title}</strong><br>
             <small style="color: var(--text-light);">${item.service.category || 'Autre'}</small>
+            ${item.service.options && item.service.options.length > 0 ? `
+              <div style="margin-top: 0.5rem; display: grid; gap: 0.35rem;">
+                ${item.service.options.map((opt, idx) => `
+                  <label style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-light);">
+                    <input type="checkbox" ${item.selectedOptions?.includes(opt.name) ? 'checked' : ''} onchange="toggleServiceOption(${item.serviceId}, '${opt.name.replace(/'/g, "\\'")}', this.checked)">
+                    ${opt.name} (+${opt.price}€)
+                  </label>
+                `).join('')}
+              </div>
+            ` : ''}
           </td>
           <td style="text-align: center;">
             <span style="color: ${item.service.type === 'subscription' ? '#10b981' : '#2563eb'}; font-weight: 600;">
               ${item.service.type === 'subscription' ? 'Abonnement' : 'Achat unique'}
             </span>
           </td>
-          <td style="text-align: center;">${item.service.price ? `${item.service.price}€` : '<em>Sur devis</em>'}</td>
+          <td style="text-align: center;">${cart.getServiceUnitPrice(item.service) ? `${cart.getServiceUnitPrice(item.service)}€${item.service.type === 'subscription' ? '/mois' : ''}` : '<em>Sur devis</em>'}</td>
           <td style="text-align: center;">
             <button class="btn-quantity" onclick="changeQuantity(${item.serviceId}, ${item.quantity - 1})">−</button>
             <input type="number" value="${item.quantity}" class="quantity-input" onchange="changeQuantity(${item.serviceId}, this.value)">
@@ -227,6 +268,23 @@ function changeQuantity(serviceId, quantity) {
     cart.updateQuantity(serviceId, qty);
     updateCartDisplay();
   }
+}
+
+/**
+ * Active/désactive l'option déplacement
+ */
+function toggleServiceOption(serviceId, optionName, enabled) {
+  const items = cart.getItems();
+  const item = items.find(i => i.serviceId === serviceId);
+  if (!item) return;
+  const selected = new Set(Array.isArray(item.selectedOptions) ? item.selectedOptions : []);
+  if (enabled) {
+    selected.add(optionName);
+  } else {
+    selected.delete(optionName);
+  }
+  cart.setSelectedOptions(serviceId, Array.from(selected));
+  updateCartDisplay();
 }
 
 /**
@@ -342,9 +400,14 @@ function submitCheckout(e) {
   
   // Créer le message avec le panier
   const items = cart.getItems();
-  const cartDetails = items.map(item => 
-    `• ${item.service.title} × ${item.quantity} = ${(item.service.price || 0) * item.quantity}€ (${item.service.type === 'subscription' ? 'Abonnement' : 'Achat unique'})`
-  ).join('\n');
+  const cartDetails = items.map(item => {
+    const unitPrice = cart.getServiceUnitPrice(item.service);
+    const optionsTotal = cart.getOptionsTotal(item);
+    const lineTotal = (unitPrice + optionsTotal) * item.quantity;
+    const optionNames = Array.isArray(item.selectedOptions) ? item.selectedOptions.join(', ') : '';
+    const optionsText = optionsTotal > 0 ? ` + Options (${optionNames || 'Sélectionnées'} : ${optionsTotal}€ x ${item.quantity})` : '';
+    return `• ${item.service.title} × ${item.quantity} = ${lineTotal}€ (${item.service.type === 'subscription' ? 'Abonnement mensuel' : 'Achat unique'})${optionsText}`;
+  }).join('\n');
   
   const total = cart.getTotal();
   

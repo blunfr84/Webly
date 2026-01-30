@@ -35,6 +35,11 @@ function updateCartBadge() {
 /**
  * Ajoute un service au panier depuis la page d'accueil
  */
+function getSelectedOptions(serviceId) {
+  return Array.from(document.querySelectorAll(`[data-option-service="${serviceId}"]:checked`))
+    .map(input => input.getAttribute('data-option-name'));
+}
+
 function addServiceToCart(serviceId) {
   // Trouver le service par ID
   let service = null;
@@ -44,7 +49,8 @@ function addServiceToCart(serviceId) {
       if (data.success) {
         service = data.data;
         if (typeof cart !== 'undefined') {
-          cart.addItem(service, 1);
+          const selectedOptions = getSelectedOptions(serviceId);
+          cart.addItem(service, 1, { selectedOptions });
           // Afficher une notification
           showNotification('✓ Service ajouté au panier');
           updateCartBadge();
@@ -124,13 +130,6 @@ function displayServices(services) {
     const card = document.createElement('div');
     card.className = 'service-card';
     
-    let priceDisplay = '';
-    if (service.price) {
-      priceDisplay = `<div class="price">${service.price.toLocaleString('fr-FR')} €</div>`;
-    } else {
-      priceDisplay = `<div class="price custom">Sur devis</div>`;
-    }
-
     let featuresList = '';
     if (service.features && service.features.length > 0) {
       featuresList = `
@@ -140,14 +139,40 @@ function displayServices(services) {
       `;
     }
 
+    const optionsList = (service.options && service.options.length > 0)
+      ? `
+        <div style="margin: 0.5rem 0 1rem; display: grid; gap: 0.35rem;">
+          ${service.options.map((opt, idx) => `
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem;">
+              <input type="checkbox" data-option-service="${service.id}" data-option-name="${opt.name}" id="option-${service.id}-${idx}">
+              ${opt.name} (+${opt.price}€)
+            </label>
+          `).join('')}
+        </div>
+      `
+      : '';
+
+    const isSubscription = service.type === 'subscription';
+    const displayPrice = isSubscription ? (service.subscriptionPrice ?? service.price) : service.price;
+    let priceDisplay = '';
+    if (displayPrice) {
+      priceDisplay = `<div class="price">${displayPrice.toLocaleString('fr-FR')} €${isSubscription ? ' / mois' : ''}</div>`;
+    } else {
+      priceDisplay = `<div class="price custom">Sur devis</div>`;
+    }
+
     card.innerHTML = `
       <h3>${service.title}</h3>
       <p>${service.description}</p>
       ${priceDisplay}
       ${featuresList}
-      <button class="btn btn-primary" onclick="addServiceToCart(${service.id})">
-        Commander
-      </button>
+      ${optionsList}
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="addServiceToCart(${service.id})">
+          Commander
+        </button>
+        ${isSubscription ? `<button class="btn btn-success" onclick="initiateSubscription(${service.id}, getSelectedOptions(${service.id}))">S'abonner</button>` : ''}
+      </div>
     `;
 
     grid.appendChild(card);
@@ -287,13 +312,25 @@ setInterval(loadServices, 60000);
  * Tracker les visiteurs pour les statistiques admin
  */
 function trackVisitor() {
-  // Incrémenter le compteur de visiteurs pour le jour
+  // Vérifier si déjà tracké aujourd'hui
   const today = new Date().toISOString().split('T')[0];
-  const visitorsKey = `visitorsToday_${today}`;
+  const trackedKey = `tracked_${today}`;
   
-  let visitors = parseInt(localStorage.getItem(visitorsKey) || '0');
-  visitors++;
+  if (sessionStorage.getItem(trackedKey)) {
+    return; // Déjà compté pour cette session aujourd'hui
+  }
   
-  localStorage.setItem(visitorsKey, visitors.toString());
-  localStorage.setItem('visitorsToday', visitors.toString());
+  // Envoyer au serveur
+  fetch(`${API_BASE}/analytics/track`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      sessionStorage.setItem(trackedKey, 'true');
+      console.log('✓ Visite enregistrée');
+    }
+  })
+  .catch(err => console.error('Erreur tracking:', err));
 }

@@ -76,6 +76,61 @@ async function initiatePayment(serviceId, serviceName, price) {
 }
 
 /**
+ * Initier un abonnement mensuel pour un service
+ */
+async function initiateSubscription(serviceId, selectedOptions = []) {
+  try {
+    const customerEmail = prompt('Veuillez entrer votre adresse email:');
+    if (!customerEmail) {
+      alert('Email requis pour l\'abonnement');
+      return;
+    }
+
+    const button = event.target;
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = '⏳ Redirection en cours...';
+
+    const response = await fetch(`${API_BASE}/payments/create-subscription-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        serviceId: serviceId,
+        customerEmail: customerEmail,
+        selectedOptions: selectedOptions
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      alert('Erreur: ' + (data.message || 'Impossible de créer une session d\'abonnement'));
+      button.disabled = false;
+      button.textContent = originalText;
+      return;
+    }
+
+    const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+    const { error } = await stripe.redirectToCheckout({
+      sessionId: data.sessionId
+    });
+
+    if (error) {
+      alert('Erreur Stripe: ' + error.message);
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  } catch (error) {
+    console.error('Erreur lors de l\'abonnement:', error);
+    alert('Une erreur s\'est produite. Veuillez réessayer.');
+    event.target.disabled = false;
+    event.target.textContent = originalText;
+  }
+}
+
+/**
  * Vérifier le statut d'un paiement (utilisé sur la page de confirmation)
  */
 async function checkPaymentStatus(sessionId) {

@@ -380,6 +380,31 @@ function displayServices(services) {
   });
 }
 
+function parseServiceOptions(text) {
+  return (text || '')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const parts = line.split('|').map(p => p.trim());
+      if (parts.length < 2) {
+        const alt = line.split(':').map(p => p.trim());
+        if (alt.length >= 2) {
+          return { name: alt[0], price: parseFloat(alt[1]) };
+        }
+        return null;
+      }
+      return { name: parts[0], price: parseFloat(parts[1]) };
+    })
+    .filter(opt => opt && opt.name && !Number.isNaN(opt.price));
+}
+
+function formatServiceOptions(options) {
+  return (options || [])
+    .map(opt => `${opt.name} | ${opt.price}`)
+    .join('\n');
+}
+
 /**
  * ===== AFFICHAGE MESSAGES =====
  */
@@ -573,6 +598,7 @@ function openServiceModal(serviceId = null) {
           document.getElementById('service-subscription-price').value = s.subscriptionPrice || '';
           document.getElementById('service-duration').value = s.duration || '';
           document.getElementById('service-features').value = (s.features || []).join('\n');
+          document.getElementById('service-options').value = formatServiceOptions(s.options);
           toggleSubscriptionPrice();
         }
       });
@@ -602,7 +628,8 @@ async function saveService(e) {
     price: document.getElementById('service-price').value ? parseFloat(document.getElementById('service-price').value) : null,
     subscriptionPrice: document.getElementById('service-subscription-price').value ? parseFloat(document.getElementById('service-subscription-price').value) : null,
     duration: document.getElementById('service-duration').value ? parseInt(document.getElementById('service-duration').value) : null,
-    features: document.getElementById('service-features').value.split('\n').filter(f => f.trim())
+    features: document.getElementById('service-features').value.split('\n').filter(f => f.trim()),
+    options: parseServiceOptions(document.getElementById('service-options').value)
   };
 
   const url = editingId ? `${API_BASE}/services/${editingId}` : `${API_BASE}/services`;
@@ -862,13 +889,13 @@ async function loadVisitorStats() {
     
     if (data.success && data.data) {
       const visitorsToday = data.data.visitors || 0;
-      document.getElementById('stat-visitors').textContent = visitorsToday;
+      updateStatWithAnimation('stat-visitors', visitorsToday);
     } else {
-      document.getElementById('stat-visitors').textContent = '0';
+      updateStatWithAnimation('stat-visitors', 0);
     }
   } catch (error) {
     console.error('Erreur chargement visiteurs:', error);
-    document.getElementById('stat-visitors').textContent = '0';
+    updateStatWithAnimation('stat-visitors', 0);
   }
 }
 

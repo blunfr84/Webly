@@ -37,16 +37,21 @@ class Cart {
   /**
    * Ajoute un service au panier
    */
-  addItem(service, quantity = 1) {
+  addItem(service, quantity = 1, options = {}) {
     const existingItem = this.items.find(item => item.serviceId === service.id);
+    const selectedOptions = Array.isArray(options.selectedOptions) ? options.selectedOptions : undefined;
 
     if (existingItem) {
       existingItem.quantity += quantity;
+      if (selectedOptions !== undefined) {
+        existingItem.selectedOptions = selectedOptions;
+      }
     } else {
       this.items.push({
         serviceId: service.id,
         quantity: quantity,
-        service: service
+        service: service,
+        selectedOptions: selectedOptions || []
       });
     }
 
@@ -76,6 +81,18 @@ class Cart {
   }
 
   /**
+   * Met à jour les options sélectionnées
+   */
+  setSelectedOptions(serviceId, selectedOptions) {
+    const item = this.items.find(i => i.serviceId === serviceId);
+    if (item) {
+      item.selectedOptions = Array.isArray(selectedOptions) ? selectedOptions : [];
+      this.saveToStorage();
+    }
+    return this;
+  }
+
+  /**
    * Vide le panier
    */
   clear() {
@@ -95,9 +112,38 @@ class Cart {
    * Obtient le total du panier
    */
   getTotal() {
-    return this.items.reduce((sum, item) => {
-      return sum + ((item.service.price || 0) * item.quantity);
-    }, 0);
+    return this.items.reduce((sum, item) => sum + this.getItemTotal(item), 0);
+  }
+
+  /**
+   * Total d'un article (avec option déplacement)
+   */
+  getItemTotal(item) {
+    const unitPrice = this.getServiceUnitPrice(item.service);
+    const optionsTotal = this.getOptionsTotal(item);
+    return (unitPrice + optionsTotal) * item.quantity;
+  }
+
+  /**
+   * Prix unitaire selon le type de service
+   */
+  getServiceUnitPrice(service) {
+    if (!service) return 0;
+    if (service.type === 'subscription') {
+      return service.subscriptionPrice ?? service.price ?? 0;
+    }
+    return service.price ?? 0;
+  }
+
+  /**
+   * Total des options sélectionnées (par unité)
+   */
+  getOptionsTotal(item) {
+    const selected = Array.isArray(item.selectedOptions) ? item.selectedOptions : [];
+    const options = Array.isArray(item.service?.options) ? item.service.options : [];
+    return options
+      .filter(opt => selected.includes(opt.name))
+      .reduce((sum, opt) => sum + (opt.price || 0), 0);
   }
 
   /**

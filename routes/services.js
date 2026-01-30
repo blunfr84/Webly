@@ -63,7 +63,7 @@ router.get('/:id', (req, res) => {
  * Crée un nouveau service (authentification requise)
  */
 router.post('/', authMiddleware, (req, res) => {
-  const { title, description, price, duration, features, category, type, subscriptionPrice } = req.body;
+  const { title, description, price, duration, features, category, type, subscriptionPrice, options } = req.body;
 
   if (!title || !description) {
     return res.status(400).json({ success: false, message: 'Titre et description requis' });
@@ -81,7 +81,8 @@ router.post('/', authMiddleware, (req, res) => {
     price: price || null,
     subscriptionPrice: subscriptionPrice || null,
     duration: duration || null,
-    features: features || []
+    features: features || [],
+    options: options || []
   };
 
   services.push(newService);
@@ -98,7 +99,7 @@ router.post('/', authMiddleware, (req, res) => {
  * Met à jour un service (authentification requise)
  */
 router.put('/:id', authMiddleware, (req, res) => {
-  const { title, description, price, duration, features, category, type, subscriptionPrice } = req.body;
+  const { title, description, price, duration, features, category, type, subscriptionPrice, options } = req.body;
   const services = loadServices();
   const serviceIndex = services.findIndex(s => s.id === parseInt(req.params.id));
 
@@ -115,7 +116,8 @@ router.put('/:id', authMiddleware, (req, res) => {
     ...(price !== undefined && { price }),
     ...(subscriptionPrice !== undefined && { subscriptionPrice }),
     ...(duration !== undefined && { duration }),
-    ...(features && { features })
+    ...(features && { features }),
+    ...(options && { options })
   };
 
   services[serviceIndex] = updatedService;

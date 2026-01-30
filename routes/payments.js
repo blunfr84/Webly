@@ -99,6 +99,88 @@ router.post('/create-checkout-session', async (req, res) => {
 });
 
 /**
+ * POST /api/payments/create-subscription-session
+ * Crée une session d'abonnement mensuel Stripe
+ */
+router.post('/create-subscription-session', async (req, res) => {
+  try {
+    const { serviceId, customerEmail, selectedOptions = [] } = req.body;
+
+    if (!serviceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID du service requis'
+      });
+    }
+
+    const services = loadServices();
+    const service = services.find(s => s.id === parseInt(serviceId));
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service non trouvé'
+      });
+    }
+
+    const basePrice = service.subscriptionPrice ?? service.price;
+    if (!basePrice) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ce service n\'a pas de prix d\'abonnement défini'
+      });
+    }
+
+    const options = Array.isArray(service.options) ? service.options : [];
+    const optionTotal = options
+      .filter(opt => selectedOptions.includes(opt.name))
+      .reduce((sum, opt) => sum + (opt.price || 0), 0);
+
+    const unitAmount = Math.round((basePrice + optionTotal) * 100);
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: service.title,
+              description: service.description
+            },
+            unit_amount: unitAmount,
+            recurring: { interval: 'month' }
+          },
+          quantity: 1
+        }
+      ],
+      mode: 'subscription',
+      customer_email: customerEmail,
+      success_url: `${BASE_URL}/payment-success.html?session_id={CHECKOUT_SESSION_ID}&service_id=${serviceId}`,
+      cancel_url: `${BASE_URL}/services.html?canceled=true`,
+      metadata: {
+        serviceId: service.id,
+        serviceName: service.title,
+        selectedOptions: selectedOptions.join(', ')
+      }
+    });
+
+    res.json({
+      success: true,
+      sessionId: session.id,
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+    });
+  } catch (error) {
+    console.error('Erreur création session abonnement Stripe:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la création de la session d\'abonnement',
+      error: error.message
+    });
+  }
+});
+
+/**
  * GET /api/payments/session/:sessionId
  * Récupère les détails d'une session de paiement
  */
