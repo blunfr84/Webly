@@ -8,6 +8,63 @@
     "price": 40,
     "subscriptionPrice": null,
     "duration": 210,
-    "features": []
+    "features": [],
+    "options": [
+      {
+        "name": "Déplacement",
+        "price": 10
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "category": "Montage-PC",
+    "title": "Montage+ Installation Windows",
+    "description": "La solution idéale pour un PC prêt dès la première minute.\nJe m’occupe de tout : montage, installation de Windows, pilotes et configuration de base.\n\n✔ Montage complet\n✔ Windows installé et prêt\n✔ Pilotes à jour\n✔ Configuration initiale incluse",
+    "type": "one-time",
+    "price": 50,
+    "subscriptionPrice": null,
+    "duration": 240,
+    "features": [],
+    "options": [
+      {
+        "name": "Déplacement",
+        "price": 10
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "category": "Autre",
+    "title": "Formule Complète",
+    "description": "La solution idéale pour un PC parfaitement adapté à vos besoins, prêt à l’emploi et optimisé dès le premier démarrage.\n\n✔ Sélection intelligente des composants\n✔ Montage professionnel\n✔ Windows installé et configuré\n✔ Tests complets de performance\n✔ PC stable, fiable et durable",
+    "type": "one-time",
+    "price": 70,
+    "subscriptionPrice": null,
+    "duration": 270,
+    "features": [],
+    "options": [
+      {
+        "name": "Déplacement",
+        "price": 10
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "category": "Montage-PC",
+    "title": "Réinitialisation PC",
+    "description": "Offrez une seconde vie à votre ordinateur et retrouvez des performances optimales.\n\n✔ Sauvegarde sécurisée des données\n✔ Système réinstallé proprement\n✔ Nettoyage complet\n✔ PC plus rapide et plus stable",
+    "type": "one-time",
+    "price": 20,
+    "subscriptionPrice": null,
+    "duration": 90,
+    "features": [],
+    "options": [
+      {
+        "name": "Déplacement",
+        "price": 10
+      }
+    ]
   }
 ]

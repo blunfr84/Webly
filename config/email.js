@@ -189,6 +189,199 @@ Date: ${messageData.date} à ${messageData.time}
 };
 
 /**
+ * Envoie une notification de paiement à l'administrateur
+ */
+const sendPaymentNotificationEmail = async (paymentData) => {
+  try {
+    if (!transporter) {
+      console.warn('⚠️ Email non configuré: définissez EMAIL_USER et EMAIL_PASSWORD dans .env');
+      return false;
+    }
+
+    const {
+      customerName,
+      customerEmail,
+      customerPhone,
+      amount,
+      serviceName,
+      transactionId,
+      date,
+      orderMessage
+    } = paymentData;
+
+    const adminRecipient = EMAIL_TO;
+    const formattedDate = new Date(date * 1000).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const mailOptions = {
+      from: EMAIL_FROM,
+      to: adminRecipient,
+      subject: `💰 Paiement reçu - ${amount}€ de ${customerName}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;">
+          
+          <!-- Container principal -->
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); margin-top: 20px; margin-bottom: 20px;">
+            
+            <!-- En-tête -->
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 30px; text-align: center; color: white;">
+              <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">💰 Paiement Reçu</h1>
+              <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Nouvel encaissement</p>
+            </div>
+            
+            <!-- Contenu principal -->
+            <div style="padding: 40px 30px;">
+              
+              <!-- Alerte urgence -->
+              <div style="background: linear-gradient(135deg, #fef08a 0%, #fcd34d 100%); border-left: 4px solid #ca8a04; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <p style="margin: 0; font-size: 16px; font-weight: 700; color: #78350f;">✨ NOUVEAU PAIEMENT</p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #92400e;">À traiter et confirmer auprès du client</p>
+              </div>
+              
+              <!-- Infos montant en avant -->
+              <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 2px solid #22c55e; padding: 25px; border-radius: 8px; text-align: center; margin-bottom: 30px;">
+                <p style="margin: 0; font-size: 12px; color: #15803d; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">Montant encaissé</p>
+                <p style="margin: 10px 0 0 0; font-size: 48px; color: #166534; font-weight: 700;">${amount}€</p>
+              </div>
+              
+              <!-- Section client -->
+              <div style="margin-bottom: 30px;">
+                <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">👤 Informations du Client</h3>
+                
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                  <div style="margin-bottom: 12px;">
+                    <p style="margin: 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Nom</p>
+                    <p style="margin: 4px 0 0 0; font-size: 15px; color: #1e293b; font-weight: 600;">${customerName}</p>
+                  </div>
+                  
+                  <div style="margin-bottom: 12px;">
+                    <p style="margin: 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Email</p>
+                    <p style="margin: 4px 0 0 0;"><a href="mailto:${customerEmail}" style="font-size: 15px; color: #2563eb; text-decoration: none; font-weight: 600;">${customerEmail}</a></p>
+                  </div>
+                  
+                  ${customerPhone ? `
+                  <div>
+                    <p style="margin: 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Téléphone</p>
+                    <p style="margin: 4px 0 0 0; font-size: 15px; color: #1e293b; font-weight: 600;"><a href="tel:${customerPhone}" style="text-decoration: none; color: #1e293b;">${customerPhone}</a></p>
+                  </div>
+                  ` : ''}
+                </div>
+              </div>
+              
+              <!-- Section service -->
+              <div style="margin-bottom: 30px;">
+                <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">📦 Service Commandé</h3>
+                
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                  <div style="display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center;">
+                    <div>
+                      <p style="margin: 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Service</p>
+                      <p style="margin: 5px 0 0 0; font-size: 15px; color: #1e293b; font-weight: 600;">${serviceName}</p>
+                    </div>
+                    <div style="text-align: right;">
+                      <p style="margin: 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Montant</p>
+                      <p style="margin: 5px 0 0 0; font-size: 18px; color: #10b981; font-weight: 700;">${amount}€</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Message du client s'il existe -->
+              ${orderMessage ? `
+              <div style="margin-bottom: 30px;">
+                <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">📝 Message du Client</h3>
+                
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b;">
+                  <p style="margin: 0; line-height: 1.6; color: #1e293b; font-size: 14px; white-space: pre-wrap; word-wrap: break-word;">${orderMessage.substring(0, 500)}${orderMessage.length > 500 ? '...' : ''}</p>
+                </div>
+              </div>
+              ` : ''}
+              
+              <!-- Transaction details -->
+              <div style="background: #f1f5f9; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #2563eb; margin-bottom: 30px;">
+                <p style="margin: 0 0 8px 0; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">ID de Transaction Stripe</p>
+                <p style="margin: 0; font-size: 12px; color: #1e293b; font-family: monospace; word-break: break-all;">${transactionId}</p>
+              </div>
+              
+              <!-- Date/heure -->
+              <div style="background: #f8fafc; padding: 15px 20px; border-radius: 8px; margin-bottom: 30px;">
+                <p style="margin: 0; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">Date et heure</p>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #1e293b; font-weight: 600;">${formattedDate}</p>
+              </div>
+              
+              <!-- Bouton d'action -->
+              <div style="text-align: center; margin-bottom: 30px;">
+                <a href="${process.env.BASE_URL || 'http://localhost:3000'}/admin" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; letter-spacing: 0.3px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;">
+                  ➜ Voir dans le Tableau de Bord
+                </a>
+              </div>
+              
+            </div>
+            
+            <!-- Pied de page -->
+            <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 25px 30px; text-align: center;">
+              <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+                ✅ La facture a été envoyée au client automatiquement.<br>
+                Assurez-vous de livrer le service commandé à temps.
+              </p>
+              <p style="margin: 12px 0 0 0; font-size: 11px; color: #cbd5e1;">
+                © 2026 ConsultPro - Tous droits réservés
+              </p>
+            </div>
+            
+          </div>
+          
+        </body>
+        </html>
+      `,
+      text: `
+PAIEMENT REÇU
+${'='.repeat(50)}
+
+Client: ${customerName}
+Email: ${customerEmail}
+${customerPhone ? `Téléphone: ${customerPhone}` : ''}
+
+Service: ${serviceName}
+Montant: ${amount}€
+
+ID de Transaction: ${transactionId}
+Date: ${formattedDate}
+
+${orderMessage ? `\nMessage du client:\n${orderMessage}\n` : ''}
+
+Action requise: Vérifiez le paiement et livrez le service.
+      `
+    };
+
+    try {
+      await transporter.verify();
+    } catch (verifyError) {
+      console.error('❌ Transport email invalide:', verifyError);
+      return false;
+    }
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Notification de paiement envoyée à ${adminRecipient}`);
+    return true;
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'envoi de la notification de paiement:', error);
+    return false;
+  }
+};
+
+/**
  * Envoie une facture par email après un paiement
  */
 const sendInvoiceEmail = async (paymentData) => {
@@ -356,6 +549,7 @@ Webly - Plateforme de Services
 
 module.exports = {
   sendNotificationEmail,
+  sendPaymentNotificationEmail,
   sendInvoiceEmail,
   transporter
 };

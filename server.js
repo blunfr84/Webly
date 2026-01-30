@@ -1,3 +1,6 @@
+// Charger les variables d'environnement
+require('dotenv').config();
+
 // Serveur Express principal
 const express = require('express');
 const cors = require('cors');

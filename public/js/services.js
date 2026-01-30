@@ -389,6 +389,116 @@ function submitCheckout(e) {
     return false;
   }
   
+  // 🔴 SI PAIEMENT PAR CARTE: UTILISER STRIPE
+  if (payment === 'card') {
+    return processStripePayment(name, email, phone, message, submitBtn);
+  }
+  
+  // 🔵 SINON: TRAITER LES AUTRES MODES DE PAIEMENT
+  return processOtherPayment(name, email, phone, payment, message, submitBtn);
+}
+
+/**
+ * Traite les paiements par carte Stripe
+ */
+async function processStripePayment(name, email, phone, message, submitBtn) {
+  try {
+    submitBtn.textContent = '⏳ Redirection vers Stripe...';
+    
+    const items = cart.getItems();
+    if (items.length === 0) {
+      showNotification('❌ Votre panier est vide');
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Envoyer la commande';
+      return false;
+    }
+
+    // Créer une session Stripe avec tous les articles du panier
+    const lineItems = items.map(item => {
+      const unitPrice = cart.getServiceUnitPrice(item.service);
+      const optionsTotal = cart.getOptionsTotal(item);
+      const totalPrice = unitPrice + optionsTotal;
+
+      return {
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: item.service.title,
+            description: item.service.description,
+            metadata: {
+              serviceId: item.service.id,
+              options: Array.isArray(item.selectedOptions) ? item.selectedOptions.join(', ') : ''
+            }
+          },
+          unit_amount: Math.round(totalPrice * 100)
+        },
+        quantity: item.quantity
+      };
+    });
+
+    const response = await fetch(`${API_BASE}/payments/create-checkout-session-with-items`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lineItems: lineItems,
+        customerEmail: email,
+        customerName: name,
+        customerPhone: phone,
+        message: message
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      showNotification('❌ Erreur: ' + (data.message || 'Impossible de créer la session de paiement'));
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Envoyer la commande';
+      return false;
+    }
+
+    // Attendre que Stripe soit chargé
+    if (typeof Stripe === 'undefined') {
+      showNotification('❌ Erreur: Stripe.js n\'est pas chargé');
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Envoyer la commande';
+      return false;
+    }
+
+    // Charger Stripe et rediriger vers Checkout
+    const publishableKey = data.publishableKey || (typeof STRIPE_PUBLISHABLE_KEY !== 'undefined' ? STRIPE_PUBLISHABLE_KEY : null);
+    
+    if (!publishableKey) {
+      showNotification('❌ Erreur: Clé Stripe publique non trouvée');
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Envoyer la commande';
+      return false;
+    }
+
+    const stripe = Stripe(publishableKey);
+    const { error } = await stripe.redirectToCheckout({
+      sessionId: data.sessionId
+    });
+
+    if (error) {
+      showNotification('❌ Erreur Stripe: ' + error.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Envoyer la commande';
+      return false;
+    }
+  } catch (error) {
+    console.error('Erreur paiement Stripe:', error);
+    showNotification('❌ Une erreur s\'est produite: ' + error.message);
+    submitBtn.disabled = false;
+    submitBtn.textContent = '✓ Envoyer la commande';
+    return false;
+  }
+}
+
+/**
+ * Traite les autres modes de paiement (virement, chèque, etc.)
+ */
+function processOtherPayment(name, email, phone, payment, message, submitBtn) {
   // Mapper les modes de paiement
   const paymentMethods = {
     'card': 'Carte bancaire',
@@ -477,11 +587,13 @@ ${message}
       console.error('Erreur:', data.message);
     }
     submitBtn.disabled = false;
+    submitBtn.textContent = '✓ Envoyer la commande';
   })
   .catch(error => {
     console.error('Erreur de connexion:', error);
     showNotification('❌ Erreur de connexion: ' + error.message);
     submitBtn.disabled = false;
+    submitBtn.textContent = '✓ Envoyer la commande';
   });
   
   return false;

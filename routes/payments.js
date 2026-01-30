@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { stripe, BASE_URL } = require('../config/stripe');
-const { sendInvoiceEmail } = require('../config/email');
+const { sendInvoiceEmail, sendPaymentNotificationEmail } = require('../config/email');
 const router = express.Router();
 
 const servicesPath = path.join(__dirname, '../data/services.json');
@@ -193,21 +193,28 @@ router.get('/session/:sessionId', async (req, res) => {
     // Si le paiement est confirmé et c'est la première fois qu'on vérifie
     if (session.payment_status === 'paid') {
       try {
-        // Envoyer la facture par email
+        // Préparation des données de paiement
         const paymentData = {
           customerEmail: session.customer_email,
           customerName: session.customer_name || session.customer_email.split('@')[0],
-          serviceName: session.metadata.serviceName,
+          customerPhone: session.metadata?.customerPhone || '',
+          serviceName: session.metadata?.serviceName || 'Service',
           amount: session.amount_total / 100, // Reconvertir en euros
-          date: new Date(session.created * 1000).toISOString(),
+          date: session.created,
           transactionId: session.id,
-          invoiceNumber: `INV-${session.id.substring(0, 8).toUpperCase()}`
+          invoiceNumber: `INV-${session.id.substring(0, 8).toUpperCase()}`,
+          orderMessage: session.metadata?.orderMessage || ''
         };
 
+        // 📧 Envoyer la facture au CLIENT
         await sendInvoiceEmail(paymentData);
+
+        // 📬 Envoyer la notification de paiement à l'ADMIN
+        await sendPaymentNotificationEmail(paymentData);
+
       } catch (emailError) {
-        console.error('⚠️ Erreur lors de l\'envoi de la facture:', emailError);
-        // On continue même si l'email échoue
+        console.error('⚠️ Erreur lors de l\'envoi des emails:', emailError);
+        // On continue même si les emails échouent
       }
     }
 
@@ -231,4 +238,57 @@ router.get('/session/:sessionId', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/payments/create-checkout-session-with-items
+ * Crée une session de paiement Stripe avec plusieurs articles du panier
+ */
+router.post('/create-checkout-session-with-items', async (req, res) => {
+  try {
+    const { lineItems = [], customerEmail, customerName, customerPhone, message } = req.body;
+
+    if (!lineItems || lineItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Panier vide'
+      });
+    }
+
+    if (!customerEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email du client requis'
+      });
+    }
+
+    // Créer la session de paiement avec tous les articles
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      customer_email: customerEmail,
+      success_url: `${BASE_URL}/payment-success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${BASE_URL}/services.html?canceled=true`,
+      metadata: {
+        customerName: customerName,
+        customerPhone: customerPhone,
+        orderMessage: message ? message.substring(0, 500) : '' // Limiter à 500 caractères
+      }
+    });
+
+    res.json({
+      success: true,
+      sessionId: session.id,
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+    });
+  } catch (error) {
+    console.error('Erreur création session multi-articles Stripe:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la création de la session de paiement',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
+
