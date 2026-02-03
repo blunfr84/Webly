@@ -285,7 +285,7 @@
   <header>
     <div class="container">
       <div class="header-content">
-        <div class="logo">🚀 ConsultPro</div>
+        <div class="logo">🚀 Webly</div>
         <nav>
           <a href="/">Accueil</a>
           <a href="/services.html" style="color: var(--primary-color); font-weight: 700;">Services</a>
@@ -687,6 +687,22 @@
       padding: 0.25rem;
     }
 
+    .quantity-input-option {
+      width: 50px;
+      padding: 0.35rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.3rem;
+      text-align: center;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .quantity-input-option:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .modal-content {
@@ -706,6 +722,7 @@
       }
     }
   </style>
+  <script src="js/version-switcher.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/services.js"></script>

@@ -12,7 +12,8 @@
     "options": [
       {
         "name": "Déplacement",
-        "price": 10
+        "price": 10,
+        "type": "one-time"
       }
     ]
   },
@@ -29,13 +30,14 @@
     "options": [
       {
         "name": "Déplacement",
-        "price": 10
+        "price": 10,
+        "type": "one-time"
       }
     ]
   },
   {
     "id": 3,
-    "category": "Autre",
+    "category": "Montage-PC",
     "title": "Formule Complète",
     "description": "La solution idéale pour un PC parfaitement adapté à vos besoins, prêt à l’emploi et optimisé dès le premier démarrage.\n\n✔ Sélection intelligente des composants\n✔ Montage professionnel\n✔ Windows installé et configuré\n✔ Tests complets de performance\n✔ PC stable, fiable et durable",
     "type": "one-time",
@@ -46,7 +48,8 @@
     "options": [
       {
         "name": "Déplacement",
-        "price": 10
+        "price": 10,
+        "type": "one-time"
       }
     ]
   },
@@ -63,7 +66,137 @@
     "options": [
       {
         "name": "Déplacement",
-        "price": 10
+        "price": 10,
+        "type": "one-time"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "category": "Création-Site",
+    "title": "Création de site – Essentiel",
+    "description": "Création d’un site vitrine simple et efficace pour présenter votre activité en ligne.\n\n✅ 1 page (présentation / contact)\n✅ Design moderne et responsive\n✅ Formulaire de contact\n✅ Mise en ligne du site",
+    "type": "one-time",
+    "price": 80,
+    "subscriptionPrice": null,
+    "duration": 2160,
+    "features": [],
+    "options": [
+      {
+        "name": "Page supplémentaire",
+        "price": 15,
+        "type": "one-time"
+      },
+      {
+        "name": "Modification de site existant",
+        "price": 20,
+        "type": "one-time"
+      },
+      {
+        "name": "Maintenance & mises à jour",
+        "price": 15,
+        "type": "subscription"
+      },
+      {
+        "name": "Ajout d’un blog",
+        "price": 30,
+        "type": "one-time"
+      },
+      {
+        "name": "Galerie photos / portfolio",
+        "price": 20,
+        "type": "one-time"
+      },
+      {
+        "name": "Connexion nom de domaine & hébergement",
+        "price": 25,
+        "type": "one-time"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "category": "Création-Site",
+    "title": "Création de site – Standard",
+    "description": "Création d’un site professionnel pour renforcer votre visibilité et votre crédibilité.\n\n✅ Jusqu’à 5 pages\n✅ Design personnalisé\n✅ Site responsive (PC / mobile)\n✅ Formulaire de contact\n✅ Optimisation SEO de base\n✅ Mise en ligne et configuration",
+    "type": "one-time",
+    "price": 150,
+    "subscriptionPrice": null,
+    "duration": 4320,
+    "features": [],
+    "options": [
+      {
+        "name": "Page supplémentaire",
+        "price": 15,
+        "type": "one-time"
+      },
+      {
+        "name": "Modification de site existant",
+        "price": 20,
+        "type": "one-time"
+      },
+      {
+        "name": "Maintenance & mises à jour",
+        "price": 15,
+        "type": "subscription"
+      },
+      {
+        "name": "Ajout d’un blog",
+        "price": 30,
+        "type": "one-time"
+      },
+      {
+        "name": "Galerie photos / portfolio",
+        "price": 20,
+        "type": "one-time"
+      },
+      {
+        "name": "Connexion nom de domaine & hébergement",
+        "price": 25,
+        "type": "one-time"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "category": "Création-Site",
+    "title": "Création de site – Formule complète ⭐ (Populaire)",
+    "description": "Solution clé en main pour un site performant, rapide et optimisé.\n\n✅ Tout le service Standard\n✅ Jusqu’à 8 pages\n✅ Design 100 % personnalisé\n✅ Optimisation SEO avancée\n✅ Performance et rapidité optimisées\n✅ Sécurité et configuration complète",
+    "type": "one-time",
+    "price": 200,
+    "subscriptionPrice": null,
+    "duration": 7200,
+    "features": [],
+    "options": [
+      {
+        "name": "Page supplémentaire",
+        "price": 15,
+        "type": "one-time"
+      },
+      {
+        "name": "Modification de site existant",
+        "price": 20,
+        "type": "one-time"
+      },
+      {
+        "name": "Maintenance & mises à jour",
+        "price": 15,
+        "type": "subscription"
+      },
+      {
+        "name": "Ajout d’un blog",
+        "price": 30,
+        "type": "one-time"
+      },
+      {
+        "name": "Galerie photos / portfolio",
+        "price": 20,
+        "type": "one-time"
+      },
+      {
+        "name": "Connexion nom de domaine & hébergement",
+        "price": 25,
+        "type": "one-time"
       }
     ]
   }

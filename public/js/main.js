@@ -36,8 +36,15 @@ function updateCartBadge() {
  * Ajoute un service au panier depuis la page d'accueil
  */
 function getSelectedOptions(serviceId) {
-  return Array.from(document.querySelectorAll(`[data-option-service="${serviceId}"]:checked`))
-    .map(input => input.getAttribute('data-option-name'));
+  const options = {};
+  document.querySelectorAll(`[data-option-service="${serviceId}"]`).forEach(input => {
+    const optionName = input.getAttribute('data-option-name');
+    const quantity = parseInt(input.value) || 0;
+    if (quantity > 0) {
+      options[optionName] = quantity;
+    }
+  });
+  return options;
 }
 
 function addServiceToCart(serviceId) {
@@ -141,13 +148,20 @@ function displayServices(services) {
 
     const optionsList = (service.options && service.options.length > 0)
       ? `
-        <div style="margin: 0.5rem 0 1rem; display: grid; gap: 0.35rem;">
-          ${service.options.map((opt, idx) => `
-            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem;">
-              <input type="checkbox" data-option-service="${service.id}" data-option-name="${opt.name}" id="option-${service.id}-${idx}">
-              ${opt.name} (+${opt.price}€)
-            </label>
-          `).join('')}
+        <div style="margin: 0.75rem 0 1rem; background: var(--light-bg); padding: 0.75rem; border-radius: 0.5rem; display: grid; gap: 0.5rem;">
+          <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-dark);">📦 Options:</div>
+          ${service.options.map((opt, idx) => {
+            const isSubscription = opt.type === 'subscription';
+            return `
+              <div style="display: flex; align-items: center; gap: 0.5rem; justify-content: space-between; font-size: 0.85rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>${opt.name}</span>
+                  <span style="color: ${isSubscription ? '#10b981' : 'var(--accent-color)'}; font-weight: 600;">+${opt.price}€${isSubscription ? '/mois' : ''}</span>
+                </label>
+                <input type="number" min="0" max="99" value="0" data-option-service="${service.id}" data-option-name="${opt.name}" id="option-${service.id}-${idx}" style="width: 50px; padding: 0.3rem; border: 1px solid var(--border-color); border-radius: 0.3rem; text-align: center;">
+              </div>
+            `;
+          }).join('')}
         </div>
       `
       : '';

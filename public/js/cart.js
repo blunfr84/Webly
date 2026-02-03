@@ -39,19 +39,20 @@ class Cart {
    */
   addItem(service, quantity = 1, options = {}) {
     const existingItem = this.items.find(item => item.serviceId === service.id);
-    const selectedOptions = Array.isArray(options.selectedOptions) ? options.selectedOptions : undefined;
+    const selectedOptions = options.selectedOptions || {};
+    // selectedOptions est maintenant un objet: {optionName: quantity, ...}
 
     if (existingItem) {
       existingItem.quantity += quantity;
       if (selectedOptions !== undefined) {
-        existingItem.selectedOptions = selectedOptions;
+        existingItem.selectedOptions = { ...existingItem.selectedOptions, ...selectedOptions };
       }
     } else {
       this.items.push({
         serviceId: service.id,
         quantity: quantity,
         service: service,
-        selectedOptions: selectedOptions || []
+        selectedOptions: selectedOptions || {}
       });
     }
 
@@ -86,7 +87,10 @@ class Cart {
   setSelectedOptions(serviceId, selectedOptions) {
     const item = this.items.find(i => i.serviceId === serviceId);
     if (item) {
-      item.selectedOptions = Array.isArray(selectedOptions) ? selectedOptions : [];
+      // selectedOptions est maintenant un objet avec {optionName: quantity}
+      item.selectedOptions = (typeof selectedOptions === 'object' && !Array.isArray(selectedOptions)) 
+        ? selectedOptions 
+        : {};
       this.saveToStorage();
     }
     return this;
@@ -139,11 +143,18 @@ class Cart {
    * Total des options sélectionnées (par unité)
    */
   getOptionsTotal(item) {
-    const selected = Array.isArray(item.selectedOptions) ? item.selectedOptions : [];
+    const selected = item.selectedOptions || {};
     const options = Array.isArray(item.service?.options) ? item.service.options : [];
-    return options
-      .filter(opt => selected.includes(opt.name))
-      .reduce((sum, opt) => sum + (opt.price || 0), 0);
+    let total = 0;
+    
+    for (const [optionName, quantity] of Object.entries(selected)) {
+      const opt = options.find(o => o.name === optionName);
+      if (opt && quantity > 0) {
+        total += (opt.price || 0) * parseInt(quantity);
+      }
+    }
+    
+    return total;
   }
 
   /**

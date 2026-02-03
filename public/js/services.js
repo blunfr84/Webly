@@ -119,19 +119,25 @@ function displayServices(services) {
             }
             ${service.type === 'subscription' ? `<div class="label" style="margin-top: 0.5rem; color: #10b981;">/mois</div>` : ''}
           </div>
-          <div style="display: flex; gap: 0.75rem;">
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             ${service.options && service.options.length > 0 ? `
-              <div style="display: grid; gap: 0.35rem; font-size: 0.85rem;">
+              <div style="display: grid; gap: 0.75rem; font-size: 0.85rem; background: var(--light-bg); padding: 1rem; border-radius: 0.5rem;">
+                <div style="font-weight: 600; color: var(--text-dark);">📦 Options disponibles:</div>
                 ${service.options.map((opt, idx) => `
-                  <label style="display: flex; align-items: center; gap: 0.5rem;">
-                    <input type="checkbox" data-option-service="${service.id}" data-option-name="${opt.name}" id="option-${service.id}-${idx}">
-                    ${opt.name} (+${opt.price}€)
-                  </label>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span>${opt.name}</span>
+                      <span style="color: var(--accent-color); font-weight: 600;">+${opt.price}€${opt.type === 'subscription' ? '/mois' : ''}</span>
+                    </label>
+                    <input type="number" min="0" max="99" value="0" data-option-service="${service.id}" data-option-name="${opt.name}" id="option-${service.id}-${idx}" style="width: 50px; padding: 0.35rem; border: 1px solid var(--border-color); border-radius: 0.3rem; text-align: center;">
+                  </div>
                 `).join('')}
               </div>
             ` : ''}
-            <button class="btn btn-primary btn-sm" onclick="addToCart(${service.id})">Ajouter au panier</button>
-            ${service.type === 'subscription' ? `<button class="btn btn-success btn-sm" onclick="initiateSubscription(${service.id}, getSelectedOptions(${service.id}))">S'abonner</button>` : ''}
+            <div style="display: flex; gap: 0.75rem;">
+              <button class="btn btn-primary btn-sm" onclick="addToCart(${service.id})">Ajouter au panier</button>
+              ${service.type === 'subscription' ? `<button class="btn btn-success btn-sm" onclick="initiateSubscription(${service.id}, getSelectedOptions(${service.id}))">S'abonner</button>` : ''}
+            </div>
           </div>
         </div>
       </div>
@@ -145,8 +151,15 @@ function displayServices(services) {
  * Ajoute un service au panier
  */
 function getSelectedOptions(serviceId) {
-  return Array.from(document.querySelectorAll(`[data-option-service="${serviceId}"]:checked`))
-    .map(input => input.getAttribute('data-option-name'));
+  const options = {};
+  document.querySelectorAll(`[data-option-service="${serviceId}"]`).forEach(input => {
+    const optionName = input.getAttribute('data-option-name');
+    const quantity = parseInt(input.value) || 0;
+    if (quantity > 0) {
+      options[optionName] = quantity;
+    }
+  });
+  return options;
 }
 
 function addToCart(serviceId) {
@@ -215,13 +228,23 @@ function updateCartDisplay() {
             <strong>${item.service.title}</strong><br>
             <small style="color: var(--text-light);">${item.service.category || 'Autre'}</small>
             ${item.service.options && item.service.options.length > 0 ? `
-              <div style="margin-top: 0.5rem; display: grid; gap: 0.35rem;">
-                ${item.service.options.map((opt, idx) => `
-                  <label style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-light);">
-                    <input type="checkbox" ${item.selectedOptions?.includes(opt.name) ? 'checked' : ''} onchange="toggleServiceOption(${item.serviceId}, '${opt.name.replace(/'/g, "\\'")}', this.checked)">
-                    ${opt.name} (+${opt.price}€)
-                  </label>
-                `).join('')}
+              <div style="margin-top: 0.75rem; display: grid; gap: 0.5rem; background: var(--light-bg); padding: 0.75rem; border-radius: 0.3rem; font-size: 0.8rem;">
+                ${item.service.options.map((opt) => {
+                  const optQty = item.selectedOptions?.[opt.name] || 0;
+                  const isSubscription = opt.type === 'subscription';
+                  return `
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                      <label style="flex: 1; display: flex; align-items: center; gap: 0.3rem;">
+                        <span>${opt.name}</span>
+                        <span style="color: ${isSubscription ? '#10b981' : 'var(--accent-color)'}; font-weight: 600; margin-left: auto;">+${opt.price}€${isSubscription ? '/mois' : ''}</span>
+                      </label>
+                      <div style="display: flex; align-items: center; gap: 0.3rem;">
+                        <input type="number" min="0" max="99" value="${optQty}" class="quantity-input-option" style="width: 45px;" onchange="updateOptionQuantity(${item.serviceId}, '${opt.name.replace(/'/g, "\\'")}', this.value)">
+                        <span style="color: var(--text-light); font-size: 0.75rem; min-width: 45px; text-align: right;">${(opt.price * optQty).toFixed(2)}€${isSubscription ? '/mois' : ''}</span>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
               </div>
             ` : ''}
           </td>
@@ -271,20 +294,32 @@ function changeQuantity(serviceId, quantity) {
 }
 
 /**
- * Active/désactive l'option déplacement
+ * Met à jour la quantité d'une option pour un service
  */
-function toggleServiceOption(serviceId, optionName, enabled) {
+function updateOptionQuantity(serviceId, optionName, quantity) {
   const items = cart.getItems();
   const item = items.find(i => i.serviceId === serviceId);
   if (!item) return;
-  const selected = new Set(Array.isArray(item.selectedOptions) ? item.selectedOptions : []);
-  if (enabled) {
-    selected.add(optionName);
+  
+  const qty = Math.max(0, parseInt(quantity) || 0);
+  const selected = item.selectedOptions || {};
+  
+  if (qty > 0) {
+    selected[optionName] = qty;
   } else {
-    selected.delete(optionName);
+    delete selected[optionName];
   }
-  cart.setSelectedOptions(serviceId, Array.from(selected));
+  
+  cart.setSelectedOptions(serviceId, selected);
   updateCartDisplay();
+}
+
+/**
+ * Active/désactive l'option déplacement (legacy, remplacé par updateOptionQuantity)
+ */
+function toggleServiceOption(serviceId, optionName, enabled) {
+  const qty = enabled ? 1 : 0;
+  updateOptionQuantity(serviceId, optionName, qty);
 }
 
 /**

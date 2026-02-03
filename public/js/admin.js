@@ -381,28 +381,84 @@ function displayServices(services) {
 }
 
 function parseServiceOptions(text) {
-  return (text || '')
-    .split('\n')
-    .map(line => line.trim())
-    .filter(Boolean)
-    .map(line => {
-      const parts = line.split('|').map(p => p.trim());
-      if (parts.length < 2) {
-        const alt = line.split(':').map(p => p.trim());
-        if (alt.length >= 2) {
-          return { name: alt[0], price: parseFloat(alt[1]) };
-        }
-        return null;
-      }
-      return { name: parts[0], price: parseFloat(parts[1]) };
-    })
-    .filter(opt => opt && opt.name && !Number.isNaN(opt.price));
+  // Cette fonction n'est plus utilisée, remplacée par getOptionsFromRows
+  return [];
 }
 
 function formatServiceOptions(options) {
-  return (options || [])
-    .map(opt => `${opt.name} | ${opt.price}`)
-    .join('\n');
+  // Cette fonction n'est plus utilisée, les options sont chargées dynamiquement
+  return '';
+}
+
+/**
+ * Gestion dynamique des options
+ */
+let optionCounter = 0;
+
+function addOptionRow(option = null) {
+  const container = document.getElementById('options-container');
+  const id = optionCounter++;
+  
+  const row = document.createElement('div');
+  row.className = 'option-row';
+  row.id = `option-row-${id}`;
+  
+  row.innerHTML = `
+    <div>
+      <div class="option-label">Nom de l'option</div>
+      <input type="text" class="option-name" placeholder="Ex: Déplacement" value="${option?.name || ''}" required>
+    </div>
+    <div>
+      <div class="option-label">Prix (€)</div>
+      <input type="number" class="option-price" step="0.01" min="0" placeholder="10" value="${option?.price || ''}" required>
+    </div>
+    <div>
+      <div class="option-label">Type</div>
+      <select class="option-type">
+        <option value="one-time" ${!option || option.type === 'one-time' ? 'selected' : ''}>Ponctuel</option>
+        <option value="subscription" ${option?.type === 'subscription' ? 'selected' : ''}>Mensuel</option>
+      </select>
+    </div>
+    <button type="button" class="btn-remove" onclick="removeOptionRow(${id})" title="Supprimer">✕</button>
+  `;
+  
+  container.appendChild(row);
+}
+
+function removeOptionRow(id) {
+  const row = document.getElementById(`option-row-${id}`);
+  if (row) {
+    row.remove();
+  }
+}
+
+function getOptionsFromRows() {
+  const rows = document.querySelectorAll('.option-row');
+  const options = [];
+  
+  rows.forEach(row => {
+    const name = row.querySelector('.option-name')?.value?.trim();
+    const price = parseFloat(row.querySelector('.option-price')?.value);
+    const type = row.querySelector('.option-type')?.value || 'one-time';
+    
+    if (name && !isNaN(price) && price >= 0) {
+      options.push({ name, price, type });
+    }
+  });
+  
+  return options;
+}
+
+function loadOptionsIntoRows(options) {
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  
+  if (options && options.length > 0) {
+    options.forEach(opt => addOptionRow(opt));
+  } else {
+    // Ajouter une ligne vide par défaut
+    addOptionRow();
+  }
 }
 
 /**
@@ -598,7 +654,10 @@ function openServiceModal(serviceId = null) {
           document.getElementById('service-subscription-price').value = s.subscriptionPrice || '';
           document.getElementById('service-duration').value = s.duration || '';
           document.getElementById('service-features').value = (s.features || []).join('\n');
-          document.getElementById('service-options').value = formatServiceOptions(s.options);
+          
+          // Charger les options dynamiquement
+          loadOptionsIntoRows(s.options);
+          
           toggleSubscriptionPrice();
         }
       });
@@ -606,6 +665,10 @@ function openServiceModal(serviceId = null) {
     document.getElementById('service-modal-title').textContent = 'Ajouter un service';
     document.getElementById('service-type').value = 'one-time';
     form.reset();
+    
+    // Initialiser avec une ligne d'option vide
+    loadOptionsIntoRows([]);
+    
     toggleSubscriptionPrice();
   }
   
@@ -629,7 +692,7 @@ async function saveService(e) {
     subscriptionPrice: document.getElementById('service-subscription-price').value ? parseFloat(document.getElementById('service-subscription-price').value) : null,
     duration: document.getElementById('service-duration').value ? parseInt(document.getElementById('service-duration').value) : null,
     features: document.getElementById('service-features').value.split('\n').filter(f => f.trim()),
-    options: parseServiceOptions(document.getElementById('service-options').value)
+    options: getOptionsFromRows()
   };
 
   const url = editingId ? `${API_BASE}/services/${editingId}` : `${API_BASE}/services`;

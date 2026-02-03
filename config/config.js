@@ -2,7 +2,7 @@
 const corsOriginEnv = process.env.CORS_ORIGIN;
 const corsOrigin = corsOriginEnv
   ? corsOriginEnv.split(',').map(origin => origin.trim()).filter(Boolean)
-  : true;
+  : false;
 
 module.exports = {
   // [MODIFIABLE] Port d'écoute du serveur - Changer selon votre environnement (production, staging)
@@ -22,5 +22,15 @@ module.exports = {
   
   // [MODIFIABLE] Origines CORS autorisées - Ajouter vos domaines de production/staging
   // Par défaut, on reflète l'origine entrante pour autoriser le front si hébergé ailleurs.
-  CORS_ORIGIN: corsOrigin
+  CORS_ORIGIN: corsOrigin,
+
+  // [SÉCURITÉ] Taille max du body
+  BODY_LIMIT: process.env.BODY_LIMIT || '1mb',
+
+  // [SÉCURITÉ] Rate limit (fenêtre en ms, max requêtes)
+  RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
+  RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX || '120', 10),
+
+  // [SÉCURITÉ] Trust proxy (à activer derrière un proxy/Load Balancer)
+  TRUST_PROXY: process.env.TRUST_PROXY === 'true' ? 1 : 0
 };
